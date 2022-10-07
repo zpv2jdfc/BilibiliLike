@@ -91,7 +91,7 @@ public class LoginRegController {
         Object attribute = session.getAttribute(LOGIN_USER);
         //未登录跳转到登陆页面
         if(attribute == null){
-            return "login";
+            return loginPage;
         }
         return homePage;
     }

@@ -1,10 +1,10 @@
 package com.bilibili.dao;
 
-import com.bilibili.pojo.User;
+import com.bilibili.entity.UserEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface UserMapper {
-    public User getUserById(@Param("id")String id);
+    public UserEntity getUserById(@Param("id")String id);
 }
