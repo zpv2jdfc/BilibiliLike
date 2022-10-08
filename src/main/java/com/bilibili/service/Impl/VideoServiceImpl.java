@@ -15,6 +15,8 @@ public class VideoServiceImpl implements VideoService {
     @Autowired
     VideoMapper videoMapper;
     public VideoResponseVo getVideoById(VideoVo vo){
+        if(vo == null)
+            return null;
         long id = vo.getVideoId();
         VideoEntity videoEntity = videoMapper.getById(id);
         return null;

@@ -27,7 +27,8 @@ import static com.bilibili.common.constant.BaseConstant.homePage;
 import static com.bilibili.common.constant.BaseConstant.loginPage;
 import static com.bilibili.common.constant.BaseConstant.regPage;
 
-@Controller
+@RestController
+@RequestMapping("auth")
 public class LoginRegController {
     @Autowired
     private UserService userService;

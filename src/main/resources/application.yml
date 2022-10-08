@@ -22,3 +22,6 @@ spring:
 mybatis:
   type-aliases-package: com.bilibili.entity
   mapper-locations: classpath:/mapper/*.xml
+server:
+  servlet:
+    context-path: /
