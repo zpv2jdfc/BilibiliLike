@@ -2,11 +2,9 @@ base:
   param:
     homePage: "redirect:http://www.bilibili.com"
     loginPage: "redirect:http://auth.bilibili.com/login.html"
-
-redis:
-
 spring:
   datasource:
+#    type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://localhost:3306/bilibili?characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     username: root
     password: 123
@@ -21,3 +19,6 @@ spring:
       max-idle: 8
       max-wait: -1
     password: 123456
+mybatis:
+  type-aliases-package: com.bilibili.entity
+  mapper-locations: classpath:/mapper/*.xml
