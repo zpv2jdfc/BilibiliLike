@@ -1,5 +1,6 @@
 package com.bilibili.controller;
 
+import com.bilibili.common.utils.JWTUtil;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
