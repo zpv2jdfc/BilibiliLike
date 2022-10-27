@@ -4,6 +4,7 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.bilibili.common.constant.BaseConstant;
 
 import java.util.Calendar;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class JWTUtil {
         //获取日历对象
         Calendar calendar=Calendar.getInstance();
         //默认7天过期
-        calendar.add(Calendar.DATE,7);
+        calendar.add(Calendar.DATE, BaseConstant.TOKEN_EXPIRES_DAY);
         //新建一个JWT的Builder对象
         JWTCreator.Builder builder = JWT.create();
         //将map集合中的数据设置进payload
