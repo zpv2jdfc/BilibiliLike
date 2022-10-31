@@ -6,5 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface UserMapper {
-    public UserEntity getUserById(@Param("id")String id);
+    public UserEntity getUserById(@Param("id")long id);
+    public UserEntity getOtherInfoById(@Param("id")long id);
+    public UserEntity getOtherInfoByName(@Param("name")String name);
 }

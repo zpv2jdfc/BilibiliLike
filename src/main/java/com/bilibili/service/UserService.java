@@ -12,4 +12,11 @@ public interface UserService {
     default ReturnData register(UserRegisterVo vo){
         return null;
     }
+    /**用户获取自己的信息 **/
+    default ReturnData getUserInfoById(long id){
+        return null;
+    }
+    /** 用户查看其他人的基本信息 **/
+    default ReturnData getOtherInfoById(long id){return null;}
+    default ReturnData getOtherInfoByName(String name){return null;}
 }

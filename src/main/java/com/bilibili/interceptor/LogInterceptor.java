@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 @Component
-public class LogHandlerInterceptor implements HandlerInterceptor {
+public class LogInterceptor implements HandlerInterceptor {
 
     @Autowired
     private TokenManager tokenManager;
