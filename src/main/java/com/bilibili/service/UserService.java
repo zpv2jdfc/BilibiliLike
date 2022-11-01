@@ -16,6 +16,8 @@ public interface UserService {
     default ReturnData getUserInfoById(long id){
         return null;
     }
+    /**修改个人信息**/
+    default ReturnData updateUserInfo(long id, String fieldName, String newValue){return null;}
     /** 用户查看其他人的基本信息 **/
     default ReturnData getOtherInfoById(long id){return null;}
     default ReturnData getOtherInfoByName(String name){return null;}

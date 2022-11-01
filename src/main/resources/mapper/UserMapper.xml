@@ -2,11 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bilibili.dao.UserMapper">
     <sql id="allColumn">
-        *
+        id, user_nickname, user_avatar, user_signature, user_level, user_privilege, user_status, user_setting, create_time, lm_time
+    </sql>
+    <sql id="basicInformation">
+        id, user_nickname, user_avatar, user_signature, user_level, user_status
     </sql>
     <sql id="tableName">
         user
     </sql>
+<!--    用户实体-->
     <resultMap id="usermap" type="userentity">
         <id property="id" column="id" />
         <result property="nickName" column="user_nickname" />
@@ -19,9 +23,23 @@
         <result property="createTime" column="createTime" />
         <result property="lmTime" column="lmTime" />
     </resultMap>
+<!--进入自己的个人空间    -->
     <select id="getUserById" resultMap="usermap">
         SELECT <include refid="allColumn"></include>
         FROM <include refid="tableName"></include>
         WHERE id = #{id}
     </select>
+<!--    查看其他人个人空间-->
+    <select id="getOtherInfoById" resultMap="usermap">
+        SELECT <include refid="basicInformation"></include>
+        FROM <include refid="tableName"></include>
+        WHERE id = #{id}
+    </select>
+<!--    新增用户-->
+    <insert id="createUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO <include refid="tableName"></include>
+        (user_nickname)
+        VALUES
+        (#{name})
+    </insert>
 </mapper>

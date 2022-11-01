@@ -36,10 +36,7 @@ public class ReturnData extends HashMap<String,Object> {
     }
 
     public static ReturnData error(int code, String msg) {
-        ReturnData r = new ReturnData();
-        r.put("code", code);
-        r.put("msg", msg);
-        return r;
+        return ok(code, msg);
     }
 
     public static ReturnData ok(String msg) {
@@ -48,9 +45,10 @@ public class ReturnData extends HashMap<String,Object> {
         return r;
     }
 
-    public static ReturnData ok(Map<String, Object> map) {
+    public static ReturnData ok(int code, String msg) {
         ReturnData r = new ReturnData();
-        r.putAll(map);
+        r.put("code", code);
+        r.put("msg", msg);
         return r;
     }
 
