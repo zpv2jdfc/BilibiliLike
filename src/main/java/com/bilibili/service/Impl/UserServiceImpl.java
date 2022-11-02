@@ -6,11 +6,9 @@ import com.bilibili.common.utils.ReturnData;
 import com.bilibili.dao.UserMapper;
 import com.bilibili.entity.UserEntity;
 import com.bilibili.service.UserService;
-import com.bilibili.vo.UserLoginVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -94,7 +92,7 @@ public class UserServiceImpl implements UserService {
         }
         //更新用户信息
         userMapper.updateUser(id, entityToTable.get(fieldName), newValue, new Date());
-        return  ReturnData.ok(CodeEnum.SUCESS.getCode(), CodeEnum.SUCESS.getMessage());
+        return  ReturnData.ok();
     }
     private static boolean checkValue(String fieldName, String value){
         if(value == null)

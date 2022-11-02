@@ -2,10 +2,10 @@ package com.bilibili.common.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.bilibili.common.constant.CodeEnum;
 import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class ReturnData extends HashMap<String,Object> {
     private static final long serialVersionUID = 1L;
@@ -31,18 +31,8 @@ public class ReturnData extends HashMap<String,Object> {
         return error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "未知异常，请联系管理员");
     }
 
-    public static ReturnData error(String msg) {
-        return error(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg);
-    }
-
     public static ReturnData error(int code, String msg) {
         return ok(code, msg);
-    }
-
-    public static ReturnData ok(String msg) {
-        ReturnData r = new ReturnData();
-        r.put("msg", msg);
-        return r;
     }
 
     public static ReturnData ok(int code, String msg) {
@@ -53,6 +43,6 @@ public class ReturnData extends HashMap<String,Object> {
     }
 
     public static ReturnData ok() {
-        return new ReturnData();
+        return ok(CodeEnum.SUCCESS.getCode(), CodeEnum.SUCCESS.getMessage());
     }
 }

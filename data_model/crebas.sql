@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2022/8/4 17:06:55                            */
+/* Created on:     2022/11/2 16:31:24                           */
 /*==============================================================*/
 
 
@@ -19,7 +19,7 @@ drop table if exists user;
 /*==============================================================*/
 create table oauth
 (
-   id                   bigint not null,
+   id                   bigint not null auto_increment,
    user_id              bigint not null,
    identity_type        varchar(256) not null,
    identifier           varchar(256) not null,
@@ -36,7 +36,7 @@ alter table oauth comment '验证登陆用户信息';
 /*==============================================================*/
 create table tb_video
 (
-   id                   bigint not null,
+   id                   bigint not null auto_increment,
    title                varchar(256) not null,
    tags                 varchar(256),
    user_id              bigint not null,
@@ -58,7 +58,7 @@ alter table tb_video comment '视频资源基本信息';
 /*==============================================================*/
 create table tb_video_comment
 (
-   id                   bigint not null,
+   id                   bigint not null auto_increment,
    video_id             bigint not null,
    user_id              bigint not null,
    parent_id            bigint not null,
@@ -75,10 +75,10 @@ create table tb_video_comment
 /*==============================================================*/
 create table tb_video_detail
 (
-   id                   bigint not null,
+   id                   bigint not null auto_increment,
    video_id             bigint,
    location             varchar(256) not null,
-   details              text not null default "",
+   details              text,
    create_time          datetime not null default current_timestamp,
    lm_time              datetime not null default current_timestamp,
    primary key (id)
@@ -91,10 +91,10 @@ alter table tb_video_detail comment '视频资源的详细信息';
 /*==============================================================*/
 create table user
 (
-   id                   bigint not null,
+   id                   bigint not null auto_increment,
    user_nickname        varchar(255) not null,
    user_avatar          varchar(2048) not null default "default",
-   user_singature       varchar(128) not null default '”“',
+   user_singature       varchar(128) not null default "",
    user_level           int not null default 0,
    user_privilege       int not null default 0,
    user_status          int not null default 0,

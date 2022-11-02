@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bilibili.dao.OAuthMapper">
+    <sql id="tableName">
+        oauth
+    </sql>
+<!--    新建用户-->
+    <insert id="createUser" useGeneratedKeys="true">
+        INSERT INTO <include refid="tableName"></include>
+        (user_id, identity_type, identifier, credential)
+        VALUES
+        (#{userid},#{identitytype},#{identifier},#{credential})
+    </insert>
+</mapper>

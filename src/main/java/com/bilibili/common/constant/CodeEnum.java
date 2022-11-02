@@ -1,10 +1,11 @@
 package com.bilibili.common.constant;
 
 public enum CodeEnum {
-    SUCESS(10000, "ok"),
+    SUCCESS(10000, "ok"),
 
     USER_EXIST(21001,"存在相同的用户"),
     USER_NOTEXIST(21002,"用户不存在"),
+    USER_NAME_ILLEGAL(21003,"用户名不符合规范"),
     USER_UPDATE_EXCEPTION(21003,"用户信息更新失败"),
     PHONE_EXIST_EXCEPTION(21004,"存在相同的手机号"),
     LOGINACCT_PASSWORD_EXCEPTION(21005,"账号或密码错误"),

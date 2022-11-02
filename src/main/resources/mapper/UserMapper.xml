@@ -36,10 +36,13 @@
         WHERE id = #{id}
     </select>
 <!--    新增用户-->
-    <insert id="createUser" useGeneratedKeys="true" keyProperty="id">
+    <insert id="createUser" useGeneratedKeys="true">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            select LAST_INSERT_ID()
+        </selectKey>
         INSERT INTO <include refid="tableName"></include>
         (user_nickname)
         VALUES
-        (#{name})
+        (#{nickName})
     </insert>
 </mapper>
