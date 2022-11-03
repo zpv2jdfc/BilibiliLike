@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RedisTokenManager implements TokenManager {
     private RedisTemplate<Long, String> redis;
+
     @Autowired
     @Qualifier(value = "redisTemplate")
     public void setRedis(RedisTemplate redis) {
@@ -25,7 +26,9 @@ public class RedisTokenManager implements TokenManager {
         //泛型设置成Long后必须更改对应的序列化方案
         redis.setKeySerializer(new JdkSerializationRedisSerializer());
     }
-
+    public void add(long id, String token){
+        redis.opsForValue().set(id, token);
+    }
     @Override
     public String createToken(long userId) {
         String id = String.valueOf(userId);

@@ -4,8 +4,10 @@ import com.bilibili.common.constant.CodeEnum;
 import com.bilibili.common.utils.ReturnData;
 import com.bilibili.dao.OAuthMapper;
 import com.bilibili.dao.UserMapper;
+import com.bilibili.entity.OAuthEntity;
 import com.bilibili.entity.UserEntity;
 import com.bilibili.service.LogService;
+import com.bilibili.vo.UserLoginVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,28 +46,58 @@ public class LogServiceImpl implements LogService {
         userEntity.setNickName(name);
         userMapper.createUser(userEntity);
         long id = userEntity.getId();
-        if(identitytype.equals(LogType.PASSWORD.getCode()))
-            oAuthMapper.createUser(id, identitytype, LogType.PASSWORD.getCode(), credential);
-        else
-            oAuthMapper.createUser(id, identitytype, identifier, credential);
+        oAuthMapper.createUser(id, identitytype, identifier, credential);
         Map data = new HashMap();
         data.put("id", id);
         ReturnData ret = ReturnData.ok();
         ret.setData(data);
         return ret;
     }
+
+    @Override
+    public ReturnData login(UserLoginVo vo) {
+        String identitytype = vo.getIdentitytype();
+        String identifier = vo.getIdentifier();
+        String credential = vo.getCredential();
+        if(!checkIdentify(identitytype, identifier, credential)){
+            return ReturnData.error(CodeEnum.USER_NAME_ILLEGAL.getCode(), CodeEnum.USER_NAME_ILLEGAL.getMessage());
+        }
+        OAuthEntity entity = new OAuthEntity();
+        entity.setIdentityType(identitytype);
+        entity.setIdentifier(identifier);
+        entity.setCredential(credential);
+        OAuthEntity oAuthEntity = oAuthMapper.getUserByUserId(entity);
+        if(!identifier.equals(oAuthEntity.getIdentifier()) || !credential.equals(oAuthEntity.getCredential())){
+            return ReturnData.error(CodeEnum.LOGINACCT_PASSWORD_EXCEPTION.getCode(), CodeEnum.LOGINACCT_PASSWORD_EXCEPTION.getMessage());
+        }
+        long userid = oAuthEntity.getUserId();
+        UserEntity userEntity = userMapper.getUserById(userid);
+        Map data = new HashMap();
+        data.put("id", userEntity.getId());
+        data.put("nickName",userEntity.getNickName());
+        data.put("avatar",userEntity.getAvatar());
+        data.put("signature",userEntity.getSingature());
+        data.put("level",userEntity.getLevel());
+        data.put("privilege",userEntity.getPrivilege());
+        data.put("status",userEntity.getStatus());
+        data.put("setting",userEntity.getSetting());
+        return ReturnData.ok().setData(data);
+    }
+
     private static boolean checkIdentify(String identitytype, String identifier, String credential){
         if(identitytype==null || credential==null)
             return false;
+//        邮箱登录
         if(identitytype.equals(LogType.PASSWORD.getCode())){
-            if(credential.length()<5 || credential.length()>=256)
+            if(credential.length()<5 || credential.length()>=256 || identifier==null)
                 return false;
+
             return true;
-        }else if(identitytype.equals(LogType.QQ.getCode())){
+        }else if(identitytype.equals(LogType.QQ.getCode())){ // QQ登录
             if(identifier==null)
                 return false;
             return true;
-        }else if(identitytype.equals(LogType.WX.getCode())){
+        }else if(identitytype.equals(LogType.WX.getCode())){  // 微信登录
             if(identifier==null)
                 return false;
             return true;

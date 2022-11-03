@@ -1,7 +1,7 @@
 package com.bilibili.dao;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
+import com.bilibili.entity.OAuthEntity;
+import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface OAuthMapper {
@@ -10,4 +10,11 @@ public interface OAuthMapper {
                             @Param("identitytype") String identitytype,
                             @Param("identifier") String identifier,
                             @Param("credential") String credential);
+    @Select("select user_id, identifier, credential from oauth where id = #{id} and identity_type = #{identityType}")
+    @Results({
+            @Result(property = "userId", column = "user_id"),
+            @Result(property = "identifier", column = "identifier"),
+            @Result(property = "credential", column = "credential"),
+    })
+    OAuthEntity getUserByUserId(@Param("entity") OAuthEntity entity);
 }

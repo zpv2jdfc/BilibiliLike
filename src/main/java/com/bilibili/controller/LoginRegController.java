@@ -28,12 +28,10 @@ import static com.bilibili.common.constant.BaseConstant.loginPage;
 import static com.bilibili.common.constant.BaseConstant.regPage;
 
 @RestController
-@RequestMapping("auth")
 public class LoginRegController {
     @Autowired
     private UserService userService;
 
-    @PostMapping(value = "/register")
     public String register(@Valid UserRegisterVo vo, BindingResult result, RedirectAttributes attributes){
         if(result.hasErrors()){
             //注册错误返回注册页面
@@ -41,7 +39,7 @@ public class LoginRegController {
             attributes.addFlashAttribute("errors",errors);
             return regPage;
         }
-        String code = vo.getCode();
+        String code = "";
         String redisCode = "";
         if(!(redisCode == null || redisCode.length() == 0)){
             if(code.equals(redisCode)){
