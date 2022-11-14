@@ -35,10 +35,11 @@ public class LogServiceImpl implements LogService {
             this.code = s;
         }
     }
-
+    private static final String defaultName = "匿名用户";
     private static final String regEx =  "[ _`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\n|\r|\t";
     @Override
     public ReturnData createUser(String name, String identitytype, String identifier, String credential){
+        name = defaultName;
         if(!checkRegistName(name) || !checkIdentify(identitytype, identifier, credential)){
             return ReturnData.error(CodeEnum.USER_NAME_ILLEGAL.getCode(), CodeEnum.USER_NAME_ILLEGAL.getMessage());
         }
@@ -49,6 +50,7 @@ public class LogServiceImpl implements LogService {
         oAuthMapper.createUser(id, identitytype, identifier, credential);
         Map data = new HashMap();
         data.put("id", id);
+        data.put("name", name);
         ReturnData ret = ReturnData.ok();
         ret.setData(data);
         return ret;
@@ -65,9 +67,8 @@ public class LogServiceImpl implements LogService {
         OAuthEntity entity = new OAuthEntity();
         entity.setIdentityType(identitytype);
         entity.setIdentifier(identifier);
-        entity.setCredential(credential);
-        OAuthEntity oAuthEntity = oAuthMapper.getUserByUserId(entity);
-        if(!identifier.equals(oAuthEntity.getIdentifier()) || !credential.equals(oAuthEntity.getCredential())){
+        OAuthEntity oAuthEntity = oAuthMapper.getUserByCredential(entity);
+        if(oAuthEntity==null || !credential.equals(oAuthEntity.getCredential())){
             return ReturnData.error(CodeEnum.LOGINACCT_PASSWORD_EXCEPTION.getCode(), CodeEnum.LOGINACCT_PASSWORD_EXCEPTION.getMessage());
         }
         long userid = oAuthEntity.getUserId();

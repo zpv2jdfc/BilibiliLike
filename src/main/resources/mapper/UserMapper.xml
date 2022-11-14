@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bilibili.dao.UserMapper">
     <sql id="allColumn">
-        id, user_nickname, user_avatar, user_signature, user_level, user_privilege, user_status, user_setting, create_time, lm_time
+        id, user_nickname, user_avatar, user_singature, user_level, user_privilege, user_status, user_setting, create_time, lm_time
     </sql>
     <sql id="basicInformation">
         id, user_nickname, user_avatar, user_signature, user_level, user_status
