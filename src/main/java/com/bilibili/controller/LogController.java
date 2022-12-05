@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @RestController
@@ -25,7 +26,7 @@ public class LogController {
     private RedisTokenManager tokenManager;
 
     @PostMapping(value = "/register")
-    public ReturnData register(@RequestBody UserRegisterVo vo, HttpServletRequest request){
+    public ReturnData register(@RequestBody UserRegisterVo vo, HttpServletResponse response){
         ReturnData ret = logService.createUser(vo.getName(), vo.getIdentitytype(), vo.getIdentifier(), vo.getCredential());
         //      注册信息验证出错
         if(Integer.parseInt(ret.get("code").toString()) != CodeEnum.SUCCESS.getCode()){
@@ -36,7 +37,7 @@ public class LogController {
         long id = Long.parseLong(map.get("id").toString());
         String token = tokenManager.createToken(id);
 //        tokenManager.add(id, token);
-        request.setAttribute("token", token);
+        response.setHeader("token", token);
         return ret;
     }
 

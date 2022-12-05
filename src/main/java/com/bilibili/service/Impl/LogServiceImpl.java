@@ -43,6 +43,13 @@ public class LogServiceImpl implements LogService {
         if(!checkRegistName(name) || !checkIdentify(identitytype, identifier, credential)){
             return ReturnData.error(CodeEnum.USER_NAME_ILLEGAL.getCode(), CodeEnum.USER_NAME_ILLEGAL.getMessage());
         }
+        OAuthEntity entity = new OAuthEntity();
+        entity.setIdentityType(identitytype);
+        entity.setIdentifier(identifier);
+        OAuthEntity oAuthEntity = oAuthMapper.getUserByCredential(entity);
+        if(oAuthEntity!=null){
+            return ReturnData.error(CodeEnum.USER_EXIST.getCode(), CodeEnum.USER_EXIST.getMessage());
+        }
         UserEntity userEntity = new UserEntity();
         userEntity.setNickName(name);
         userMapper.createUser(userEntity);
@@ -50,7 +57,13 @@ public class LogServiceImpl implements LogService {
         oAuthMapper.createUser(id, identitytype, identifier, credential);
         Map data = new HashMap();
         data.put("id", id);
-        data.put("name", name);
+        data.put("name", userEntity.getNickName());
+        data.put("singature", userEntity.getAvatar());
+        data.put("avatar", userEntity.getSingature());
+        data.put("level", userEntity.getLevel());
+        data.put("privilege", userEntity.getPrivilege());
+        data.put("status", userEntity.getStatus());
+        data.put("setting", userEntity.getSetting());
         ReturnData ret = ReturnData.ok();
         ret.setData(data);
         return ret;
