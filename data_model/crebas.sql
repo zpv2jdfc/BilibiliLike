@@ -1,12 +1,14 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2022/11/2 16:31:24                           */
+/* Created on:     2022/12/23 16:22:13                          */
 /*==============================================================*/
 
 
 drop table if exists oauth;
 
 drop table if exists tb_video;
+
+drop table if exists tb_video_biu;
 
 drop table if exists tb_video_comment;
 
@@ -48,10 +50,23 @@ create table tb_video
    status               int not null default 0,
    create_time          datetime not null default current_timestamp,
    lm_time              datetime not null default current_timestamp,
+   biu_num              int(12),
    primary key (id)
 );
 
 alter table tb_video comment '视频资源基本信息';
+
+/*==============================================================*/
+/* Table: tb_video_biu                                          */
+/*==============================================================*/
+create table tb_video_biu
+(
+   video_id             bigint not null,
+   user_id              bigint,
+   biu_time             int,
+   content              varchar(256),
+   primary key (video_id)
+);
 
 /*==============================================================*/
 /* Table: tb_video_comment                                      */
@@ -108,6 +123,9 @@ alter table user comment '用户最基本的信息，不包含登录信息';
 
 alter table oauth add constraint fk_oauth_user foreign key (user_id)
       references user (id) on delete restrict on update restrict;
+
+alter table tb_video_biu add constraint fk_reference_5 foreign key (video_id)
+      references tb_video (id) on delete restrict on update restrict;
 
 alter table tb_video_comment add constraint fk_comment_user foreign key (user_id)
       references user (id) on delete restrict on update restrict;
