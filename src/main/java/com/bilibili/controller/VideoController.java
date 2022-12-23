@@ -5,20 +5,17 @@ import com.alibaba.fastjson.TypeReference;
 import com.bilibili.common.constant.CodeEnum;
 import com.bilibili.common.utils.ReturnData;
 import com.bilibili.service.VideoService;
-import com.bilibili.vo.SubmissionResponseVo;
-import com.bilibili.vo.UploadVideoVo;
-import com.bilibili.vo.VideoResponseVo;
-import com.bilibili.vo.VideoVo;
+import com.bilibili.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.bilibili.common.constant.VideoConstant.uploadStatus;
@@ -48,5 +45,20 @@ public class VideoController {
             return ReturnData.ok().setData(ret);
         }
         return ReturnData.error(CodeEnum.NO_VIDEO_EXCEPTION.getCode(), CodeEnum.NO_VIDEO_EXCEPTION.getMessage());
+    }
+    @GetMapping(value = "getbiu")
+    public ReturnData getBiu(@RequestParam("videoId")long videoId, @RequestParam("begin")int begin, @RequestParam("end")int end){
+        List biuList = this.videoService.getBiu(videoId,begin,end);
+        if(biuList!=null){
+            ReturnData res = new ReturnData().ok();
+            res.setData(biuList);
+            return res;
+        }
+        return ReturnData.error(CodeEnum.NO_VIDEO_EXCEPTION.getCode(), CodeEnum.NO_VIDEO_EXCEPTION.getMessage());
+    }
+    @PostMapping(value = "biu")
+    public ReturnData biu(@RequestBody BarrageVo vo){
+        int res = videoService.addBiu(vo);
+        return ReturnData.ok();
     }
 }

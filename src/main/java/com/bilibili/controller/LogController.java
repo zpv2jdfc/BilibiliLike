@@ -42,7 +42,7 @@ public class LogController {
     }
 
     @PostMapping(value = "/login")
-    public ReturnData login(@RequestBody UserLoginVo vo, HttpServletRequest request){
+    public ReturnData login(@RequestBody UserLoginVo vo, HttpServletResponse response){
         ReturnData ret = logService.login(vo);
 //      登陆验证出错
         if(Integer.parseInt(ret.get("code").toString()) != CodeEnum.SUCCESS.getCode()){
@@ -52,8 +52,7 @@ public class LogController {
         Map map = ret.getData(new TypeReference<Map>(){});
         long id = Long.parseLong(map.get("id").toString());
         String token = tokenManager.createToken(id);
-//        tokenManager.add(id, token);
-        request.setAttribute("token", token);
+        response.setHeader("token", token);
         return ret;
     }
 }

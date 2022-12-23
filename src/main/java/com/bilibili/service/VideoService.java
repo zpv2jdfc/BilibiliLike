@@ -1,6 +1,7 @@
 package com.bilibili.service;
 
 import com.bilibili.common.utils.ReturnData;
+import com.bilibili.vo.BarrageVo;
 import com.bilibili.vo.UploadVideoVo;
 import com.bilibili.vo.VideoResponseVo;
 import com.bilibili.vo.VideoVo;
@@ -23,4 +24,6 @@ public interface VideoService {
     default List<VideoResponseVo> getVideoList(List<VideoVo> vo){
         return null;
     }
+    List<Map> getBiu(long id, int begin, int end);
+    int addBiu(BarrageVo vo);
 }
