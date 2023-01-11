@@ -61,4 +61,13 @@ public class VideoController {
         int res = videoService.addBiu(vo);
         return ReturnData.ok();
     }
+    @PostMapping(value = "addComment")
+    public ReturnData addComment(@RequestParam("videoId")long videoId, @RequestParam("content")String content){
+
+    }
+
+    @GetMapping(value = "getComment")
+    public ReturnData getComment(@RequestParam("videoId")long videoId){
+
+    }
 }

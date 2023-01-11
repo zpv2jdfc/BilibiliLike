@@ -7,6 +7,7 @@ import com.bilibili.vo.VideoResponseVo;
 import com.bilibili.vo.VideoVo;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -26,4 +27,8 @@ public interface VideoService {
     }
     List<Map> getBiu(long id, int begin, int end);
     int addBiu(BarrageVo vo);
+    int addComment(long videoId, String content);
+    List<Map>getComment(long videoId);
+    public int addComment(long videoId, String content, Date commentTime);
+    public int addSubComment(long videoId, long parentId, String content, Date commentTime);
 }

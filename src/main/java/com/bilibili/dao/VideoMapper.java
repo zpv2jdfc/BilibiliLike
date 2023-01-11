@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.math.BigInteger;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -19,4 +20,16 @@ public interface VideoMapper {
 
     @Insert("insert into ${tableName} (video_id,user_id,biu_time,content) values(#{videoId},#{userId},#{time},#{content})")
     public int addBiu(@Param("tableName") String tableName, @Param("videoId") long videoId, @Param("content")String content,@Param("userId") long userId, @Param("time")int time);
+
+    @Insert("insert into $(tableName) (video_id,user_id,comment,parent_id,comment_time) values(#{videoId},#{userId},#{content},#{parent},#{commentTime})")
+    public int addComment(@Param("tableName")String tableName,
+                          @Param("videoId")long videoId,
+                          @Param("userId")long userId,
+                          @Param("content")String content,
+                          @Param("parent")long parent,
+                          @Param("commentTime") Date commentTime
+                          );
+
+    @Select("select id,user_id,parent_id,comment,like_num,comment_time from ${tableName} where video_id=#{videoId}")
+    public List<Map> getComment(@Param("tableName")String tableName, @Param("videoId")long videoId);
 }
