@@ -2,6 +2,7 @@ package com.bilibili.service.Impl;
 
 import com.bilibili.dao.VideoMapper;
 import com.bilibili.entity.VideoEntity;
+import com.bilibili.vo.VideoVo;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -12,6 +13,6 @@ public class VideoServiceImplServiceTest extends BaseServiceTest {
     @Test
     public void getVideoById() {
         long id = 1;
-        VideoEntity videoEntity = videoMapper.getById(id);
+        VideoVo videoEntity = videoMapper.getVideoById(id);
     }
 }

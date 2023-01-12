@@ -1,16 +1,14 @@
 package com.bilibili.service.Impl;
 
 import com.bilibili.dao.VideoMapper;
-import com.bilibili.entity.VideoEntity;
 import com.bilibili.service.VideoService;
 import com.bilibili.vo.BarrageVo;
-import com.bilibili.vo.CommentVo;
-import com.bilibili.vo.VideoResponseVo;
 import com.bilibili.vo.VideoVo;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -18,13 +16,10 @@ import java.util.*;
 public class VideoServiceImpl implements VideoService {
     @Autowired
     VideoMapper videoMapper;
-    public VideoResponseVo getVideoById(VideoVo vo){
-        if(vo == null)
-            return null;
-        long id = vo.getVideoId();
-        VideoEntity videoEntity = videoMapper.getById(id);
-        return null;
-    }
+
+    private static DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+
 
     @Override
     public List<Map> getBiu(long id, int begin, int end) {
@@ -41,12 +36,15 @@ public class VideoServiceImpl implements VideoService {
         int time = vo.getTime();
         return videoMapper.addBiu(tableName,videoId,content,userId,time);
     }
+
+
     @Override
     public int addComment(long videoId, String content, Date commentTime) {
         String tableName = "tb_video_comment" + videoId/10000;
         long userId = 0;
         long parent = -1;
-        int res = videoMapper.addComment(tableName, videoId, userId, content, parent, commentTime);
+
+        int res = videoMapper.addComment(tableName, videoId, userId, content, parent, df.format(commentTime));
         return res;
     }
     @Override
@@ -54,9 +52,16 @@ public class VideoServiceImpl implements VideoService {
         String tableName = "tb_video_comment" + videoId/10000;
         long userId = 0;
         long parent = parentId;
-        int res = videoMapper.addComment(tableName, videoId, userId, content, parent, commentTime);
+        int res = videoMapper.addComment(tableName, videoId, userId, content, parent, df.format(commentTime));
         return res;
     }
+
+    @Override
+    public VideoVo getVideoById(long videoId) {
+        VideoVo vo = videoMapper.getVideoById(videoId);
+        return vo;
+    }
+
     @Override
     public List<Map> getComment(long videoId) {
         String tableName = "tb_video_comment" + videoId/10000;
@@ -68,12 +73,12 @@ public class VideoServiceImpl implements VideoService {
         Queue<Map> que = new PriorityQueue<>(new Comparator<Map>() {
             @Override
             public int compare(Map o1, Map o2) {
-                return ((Date) o1.get("comment_time")).compareTo((Date) o2.get("comment_time"));
+                return ((Date) o1.get("commentTime")).compareTo((Date) o2.get("commentTime"));
             }
         });
         for(Map item : temp){
             long id = Long.parseLong(item.get("id").toString());
-            long parentId = Long.parseLong(item.get("parent_id").toString());
+            long parentId = Long.parseLong(item.get("parentId").toString());
             if(parentId==-1){
                 map.put(id, item);
                 que.offer(item);

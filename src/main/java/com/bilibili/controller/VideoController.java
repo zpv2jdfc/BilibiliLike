@@ -6,15 +6,21 @@ import com.bilibili.common.constant.CodeEnum;
 import com.bilibili.common.utils.ReturnData;
 import com.bilibili.service.VideoService;
 import com.bilibili.vo.*;
+import org.hibernate.validator.constraints.CodePointLength;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import sun.java2d.pipe.SpanShapeRenderer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +31,8 @@ import static com.bilibili.common.constant.VideoConstant.uploadStatus;
 public class VideoController {
     @Autowired
     private VideoService videoService;
+
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @PostMapping(value = "upload")
     public Map upLoadVideo(@RequestParam("file") MultipartFile file, String jsonUploadVideoVo, HttpSession session){
@@ -37,14 +45,18 @@ public class VideoController {
         return ret;
     }
 
-    @PostMapping(value = "watch")
-    public ReturnData getVideo(String jsonVideoVo, HttpSession session){
-        VideoVo vo = JSON.parseObject(jsonVideoVo, new TypeReference<VideoVo>(){});
-        VideoResponseVo ret = videoService.getVideoById(vo);
-        if(ret != null){
-            return ReturnData.ok().setData(ret);
+    @GetMapping(value = "watch/{videoId}")
+    public ReturnData getVideo(@PathVariable("videoId") String videoId){
+        if(videoId==null || !videoId.matches("[0-9]+")){
+            return ReturnData.error(CodeEnum.NO_VIDEO_EXCEPTION.getCode(), CodeEnum.NO_VIDEO_EXCEPTION.getMessage());
         }
-        return ReturnData.error(CodeEnum.NO_VIDEO_EXCEPTION.getCode(), CodeEnum.NO_VIDEO_EXCEPTION.getMessage());
+        VideoVo vo = videoService.getVideoById(Long.parseLong(videoId));
+        if(vo==null){
+            return ReturnData.error(CodeEnum.NO_VIDEO_EXCEPTION.getCode(), CodeEnum.NO_VIDEO_EXCEPTION.getMessage());
+        }
+        ReturnData res = ReturnData.ok();
+        res.setData(vo);
+        return res;
     }
     @GetMapping(value = "getbiu")
     public ReturnData getBiu(@RequestParam("videoId")long videoId, @RequestParam("begin")int begin, @RequestParam("end")int end){
@@ -62,12 +74,17 @@ public class VideoController {
         return ReturnData.ok();
     }
     @PostMapping(value = "addComment")
-    public ReturnData addComment(@RequestParam("videoId")long videoId, @RequestParam("content")String content){
+    public ReturnData addComment(@RequestBody CommentVo vo) throws ParseException {
+        int res = videoService.addComment(vo.getVideoId(), vo.getContent(), vo.getCommentTime());
+        return ReturnData.ok();
 
     }
 
     @GetMapping(value = "getComment")
     public ReturnData getComment(@RequestParam("videoId")long videoId){
-
+        List<Map> data = videoService.getComment(videoId);
+        ReturnData res = ReturnData.ok();
+        res.setData(data);
+        return res;
     }
 }
