@@ -22,4 +22,11 @@ public class CommentVo {
     @JsonProperty(value = "userId")
     long userId;
 
+//    回复的父对象
+    @JsonProperty(value = "parentId")
+    long parentId;
+//    具体回复人
+    @JsonProperty(value = "replyId")
+    long replyId;
+
 }

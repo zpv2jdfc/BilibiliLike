@@ -75,11 +75,24 @@ public class VideoController {
     }
     @PostMapping(value = "addComment")
     public ReturnData addComment(@RequestBody CommentVo vo) throws ParseException {
+        if(vo.getContent()==null || vo.getContent().length()==0){
+            ReturnData res = ReturnData.error(CodeEnum.NO_COMMENT_EXCEPTION.getCode(), CodeEnum.NO_COMMENT_EXCEPTION.getMessage());
+            return res;
+        }
         int res = videoService.addComment(vo.getVideoId(), vo.getContent(), vo.getCommentTime());
         return ReturnData.ok();
 
     }
+    @PostMapping(value = "addSubComment")
+    public ReturnData addSubComment(@RequestBody CommentVo vo) throws ParseException {
+        if(vo.getContent()==null || vo.getContent().length()==0){
+            ReturnData res = ReturnData.error(CodeEnum.NO_COMMENT_EXCEPTION.getCode(), CodeEnum.NO_COMMENT_EXCEPTION.getMessage());
+            return res;
+        }
+        int res = videoService.addSubComment(vo.getVideoId(),vo.getParentId(),vo.getReplyId(), vo.getContent(), vo.getCommentTime());
+        return ReturnData.ok();
 
+    }
     @GetMapping(value = "getComment")
     public ReturnData getComment(@RequestParam("videoId")long videoId){
         List<Map> data = videoService.getComment(videoId);

@@ -1,9 +1,11 @@
 package com.bilibili.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -20,7 +22,8 @@ public class VideoVo {
     private int playNum;
     private int biuNum;
     private int commentNum;
-    private Date upTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Timestamp upTime;
     private String tags;
     private String intro;
 }

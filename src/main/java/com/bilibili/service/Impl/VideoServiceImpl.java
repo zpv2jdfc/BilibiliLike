@@ -7,6 +7,7 @@ import com.bilibili.vo.VideoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -44,15 +45,15 @@ public class VideoServiceImpl implements VideoService {
         long userId = 0;
         long parent = -1;
 
-        int res = videoMapper.addComment(tableName, videoId, userId, content, parent, df.format(commentTime));
+        int res = videoMapper.addComment(tableName, videoId, userId, content, parent, -1, new Timestamp(commentTime.getTime()));
         return res;
     }
     @Override
-    public int addSubComment(long videoId, long parentId, String content, Date commentTime) {
+    public int addSubComment(long videoId, long parentId, long reply, String content, Date commentTime) {
         String tableName = "tb_video_comment" + videoId/10000;
         long userId = 0;
         long parent = parentId;
-        int res = videoMapper.addComment(tableName, videoId, userId, content, parent, df.format(commentTime));
+        int res = videoMapper.addComment(tableName, videoId, userId, content, parent, reply, new Timestamp(commentTime.getTime()));
         return res;
     }
 
@@ -73,7 +74,7 @@ public class VideoServiceImpl implements VideoService {
         Queue<Map> que = new PriorityQueue<>(new Comparator<Map>() {
             @Override
             public int compare(Map o1, Map o2) {
-                return ((Date) o1.get("commentTime")).compareTo((Date) o2.get("commentTime"));
+                return o1.get("commentTime").toString().compareTo(o2.get("commentTime").toString());
             }
         });
         for(Map item : temp){

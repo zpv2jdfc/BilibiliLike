@@ -12,6 +12,7 @@ public enum CodeEnum {
 
 
     NO_VIDEO_EXCEPTION(31000,"视频不存在"),
+    NO_COMMENT_EXCEPTION(32000,"评论不能为空"),
 
     UNKNOW_EXCEPTION(50000,"系统未知异常"),
     VAILD_EXCEPTION(50001,"参数格式校验失败"),

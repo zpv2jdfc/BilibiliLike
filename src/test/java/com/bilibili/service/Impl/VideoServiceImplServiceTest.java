@@ -12,7 +12,7 @@ public class VideoServiceImplServiceTest extends BaseServiceTest {
     VideoMapper videoMapper;
     @Test
     public void getVideoById() {
-        long id = 1;
+        long id = 0;
         VideoVo videoEntity = videoMapper.getVideoById(id);
     }
 }

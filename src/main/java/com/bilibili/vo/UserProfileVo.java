@@ -14,4 +14,5 @@ public class UserProfileVo {
     private int level;
     private int privilege;
     private int status;
+    private String url;
 }
