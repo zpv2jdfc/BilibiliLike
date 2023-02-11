@@ -43,14 +43,16 @@ public interface VideoMapper {
     public int addBiu(@Param("tableName") String tableName, @Param("videoId") long videoId, @Param("content")String content,@Param("userId") long userId, @Param("time")int time);
 
 //    新增评论
-    @Insert("insert into ${tableName} (video_id,user_id,comment,parent_id,comment_time,reply_id) values(#{videoId},#{userId},#{content},#{parent},#{commentTime},#{reply})")
+    @Insert("insert into ${tableName} (video_id,user_id,comment,parent_id,comment_time,reply_id,reply_name,reply_url) values(#{videoId},#{userId},#{content},#{parent},#{commentTime},#{reply}),#{replyName},#{replyUrl}")
     public int addComment(@Param("tableName")String tableName,
                           @Param("videoId")long videoId,
                           @Param("userId")long userId,
                           @Param("content")String content,
                           @Param("parent")long parent,
                           @Param("reply") long reply,
-                          @Param("commentTime") Timestamp commentTime
+                          @Param("commentTime") Timestamp commentTime,
+                          @Param("replyName")String replyName,
+                          @Param("replyUrl")String replyUrl
                           );
 
 
@@ -65,6 +67,8 @@ public interface VideoMapper {
                     @Result(column = "comment", property = "comment"),
                     @Result(column = "like_num", property = "likeNum"),
                     @Result(column = "comment_time", property = "commentTime", javaType = String.class),
+                    @Result(column = "reply_name", property = "replyName", javaType = String.class),
+                    @Result(column = "reply_url", property = "replyUrl", javaType = String.class),
                     @Result(column = "user_id", property = "user", javaType = UserProfileVo.class,
                     one = @One(select = "com.bilibili.dao.VideoMapper.getUserProfileById")),
                     @Result(column = "reply_id", property = "replyTo", javaType = UserProfileVo.class,

@@ -29,4 +29,10 @@ public class CommentVo {
     @JsonProperty(value = "replyId")
     long replyId;
 
+    @JsonProperty(value = "replyName")
+    String replyName;
+
+    @JsonProperty(value = "replyUrl")
+    String replyUrl;
+
 }

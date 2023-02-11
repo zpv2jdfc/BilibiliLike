@@ -23,6 +23,6 @@ public interface VideoService {
     int addBiu(BarrageVo vo);
     List<Map>getComment(long videoId);
     public int addComment(long videoId, String content, Date commentTime);
-    public int addSubComment(long videoId, long parentId,long reply, String content, Date commentTime);
+    public int addSubComment(long videoId, long parentId, long reply, String content, String replyName, String replyUrl, Date commentTime);
     public VideoVo getVideoById(long videoId);
 }

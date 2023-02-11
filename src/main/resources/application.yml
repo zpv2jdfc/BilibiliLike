@@ -2,6 +2,8 @@ base:
   param:
     homePage: "redirect:http://www.bilibili.com"
     loginPage: "redirect:http://auth.bilibili.com/login.html"
+    tempLocation: "C:\\Users\\vming\\Desktop\\file\\"
+    fileLocation: "C:\\Users\\vming\\Desktop\\file\\"
 spring:
   datasource:
 #    type: com.alibaba.druid.pool.DruidDataSource

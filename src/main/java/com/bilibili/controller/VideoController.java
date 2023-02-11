@@ -89,7 +89,7 @@ public class VideoController {
             ReturnData res = ReturnData.error(CodeEnum.NO_COMMENT_EXCEPTION.getCode(), CodeEnum.NO_COMMENT_EXCEPTION.getMessage());
             return res;
         }
-        int res = videoService.addSubComment(vo.getVideoId(),vo.getParentId(),vo.getReplyId(), vo.getContent(), vo.getCommentTime());
+        int res = videoService.addSubComment(vo.getVideoId(),vo.getParentId(),vo.getReplyId(), vo.getContent(), vo.getReplyName(), vo.getReplyUrl(), vo.getCommentTime());
         return ReturnData.ok();
 
     }

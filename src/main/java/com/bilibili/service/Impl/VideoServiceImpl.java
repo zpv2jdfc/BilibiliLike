@@ -45,15 +45,15 @@ public class VideoServiceImpl implements VideoService {
         long userId = 0;
         long parent = -1;
 
-        int res = videoMapper.addComment(tableName, videoId, userId, content, parent, -1, new Timestamp(commentTime.getTime()));
+        int res = videoMapper.addComment(tableName, videoId, userId, content, parent, -1, new Timestamp(commentTime.getTime()),"","");
         return res;
     }
     @Override
-    public int addSubComment(long videoId, long parentId, long reply, String content, Date commentTime) {
+    public int addSubComment(long videoId, long parentId, long reply, String content, String replyName, String replyUrl, Date commentTime) {
         String tableName = "tb_video_comment" + videoId/10000;
         long userId = 0;
         long parent = parentId;
-        int res = videoMapper.addComment(tableName, videoId, userId, content, parent, reply, new Timestamp(commentTime.getTime()));
+        int res = videoMapper.addComment(tableName, videoId, userId, content, parent, reply, new Timestamp(commentTime.getTime()),replyName, replyUrl);
         return res;
     }
 
