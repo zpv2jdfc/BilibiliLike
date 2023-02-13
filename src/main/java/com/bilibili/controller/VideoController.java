@@ -18,6 +18,7 @@ import sun.java2d.pipe.SpanShapeRenderer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import java.sql.Blob;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -36,8 +37,10 @@ public class VideoController {
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @PostMapping(value = "upload")
-    public Map upLoadVideo(String title, String cover, String descript, String label, @RequestHeader Map<String,String> header){
-        return ReturnData.ok();
+    public Map upLoadVideo( UploadVideoVo vo, @RequestHeader Map<String,String> header){
+
+        vo.setUserId(Integer.valueOf(header.get("id")));
+        return videoService.upload(vo);
     }
 
     @GetMapping(value = "watch/{videoId}")

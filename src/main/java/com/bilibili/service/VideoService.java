@@ -15,7 +15,7 @@ public interface VideoService {
     default ReturnData uploadWithBlock(UploadVideoVo vo, MultipartFile file){
         return null;
     }
-    default Map upload(UploadVideoVo vo, MultipartFile file){
+    default ReturnData upload(UploadVideoVo vo){
         return null;
     }
 

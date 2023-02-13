@@ -1,8 +1,10 @@
 package com.bilibili.service.Impl;
 
+import com.bilibili.common.utils.ReturnData;
 import com.bilibili.dao.VideoMapper;
 import com.bilibili.service.VideoService;
 import com.bilibili.vo.BarrageVo;
+import com.bilibili.vo.UploadVideoVo;
 import com.bilibili.vo.VideoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -88,5 +90,12 @@ public class VideoServiceImpl implements VideoService {
             }
         }
         return new ArrayList<>(que);
+    }
+
+    @Override
+    public ReturnData upload(UploadVideoVo vo){
+        this.videoMapper.addVideo(vo.getTitle(),vo.getTags(),vo.getUserId(),vo.getDuration(),vo.getLikeNum(),vo.getCommentNum(),vo.getPreview(),vo.getReleaseTime(),
+                vo.getStatus(),vo.getCreateTime(),vo.getLmTime(),vo.getCover(),vo.getIntro());
+        return ReturnData.ok();
     }
 }

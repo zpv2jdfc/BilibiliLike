@@ -4,8 +4,10 @@ import com.bilibili.entity.VideoEntity;
 import com.bilibili.vo.UserProfileVo;
 import com.bilibili.vo.VideoVo;
 import org.apache.ibatis.annotations.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
+import java.sql.Blob;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -94,4 +96,19 @@ public interface VideoMapper {
     )
     public UserProfileVo getUserProfileById(@Param("userId")long userId);
 
+//    用户上传视频
+    @Insert("insert into tb_video (title,tags,user_id,duration,like_num,comment_num,preview,release_time,status,create_time,lm_time,cover) " +
+            "values (#{title},#{tags},#{userId},#{duration},#{likeNum},#{commentNum},#{preview},#{releaseTime},#{status},#{createTime},#{lmTime},#{cover})")
+    public int addVideo(@Param("title")String title,
+                        @Param("tags")String tags,
+                        @Param("userId")long userId,
+                        @Param("duration")int duration,
+                        @Param("likeNum")int likeNum,
+                        @Param("commentNum")int commentNum,
+                        @Param("preview")String preview,
+                        @Param("releaseTime")Timestamp releaseTime,
+                        @Param("status")int status,
+                        @Param("createTime")Timestamp createTime,
+                        @Param("lmTime")Timestamp lmTime, @Param("cover") byte[] cover, @Param("intro") String intro
+                        );
 }
