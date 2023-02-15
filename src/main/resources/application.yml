@@ -12,15 +12,15 @@ spring:
     password: 123
     driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
-    host: 127.0.0.1
-    port: 6379
+    host: 1.116.112.80
+    port: 16379
     timeout: 20000
     pool:
       max-active: 8
       min-idle: 0
       max-idle: 8
       max-wait: -1
-    password: 123456
+    password: vming793012545
 mybatis:
   type-aliases-package: com.bilibili.entity
   mapper-locations: classpath:/mapper/*.xml
@@ -31,7 +31,7 @@ server:
 #rocketmq配置信息
 rocketmq:
   #nameservice服务器地址（多个以英文逗号隔开）
-  name-server: 127.0.0.1:9876
+  name-server: 1.116.112.80:9876
   #生产者配置
   producer:
     #组名
@@ -45,3 +45,13 @@ rocketmq:
     async-tag: anran-async-tags
     #oneway tag(单向消息tag)
     oneway-tag: anran-oneway-tags
+
+  #消费者配置
+  consumer:
+    #组名
+    group: anran-consumer-group
+    #监听主题
+    topic: anran-topic
+    #tags（监听多个tag时使用 || 进行分割，如果监听所有使用*或者不填）
+    tags: anran-sync-tags||anran-async-tags||anran-oneway-tags
+

@@ -6,6 +6,7 @@ import com.bilibili.common.manager.Impl.RedisTokenManager;
 import com.bilibili.common.manager.TokenManager;
 import com.bilibili.common.utils.JWTUtil;
 import com.bilibili.common.utils.ReturnData;
+import com.bilibili.config.CacheService;
 import com.bilibili.service.LogService;
 import com.bilibili.vo.UserLoginVo;
 import com.bilibili.vo.UserRegisterVo;
@@ -24,6 +25,8 @@ public class LogController {
     private LogService logService;
     @Autowired
     private RedisTokenManager tokenManager;
+    @Autowired
+    private CacheService cacheService;
 
     @PostMapping(value = "/register")
     public ReturnData register(@RequestBody UserRegisterVo vo, HttpServletResponse response){
@@ -36,7 +39,7 @@ public class LogController {
         Map map = ret.getData(new TypeReference<Map>(){});
         long id = Long.parseLong(map.get("id").toString());
         String token = tokenManager.createToken(id);
-//        tokenManager.add(id, token);
+        tokenManager.add(id, token);
         response.setHeader("token", token);
         return ret;
     }
@@ -52,6 +55,7 @@ public class LogController {
         Map map = ret.getData(new TypeReference<Map>(){});
         long id = Long.parseLong(map.get("id").toString());
         String token = tokenManager.createToken(id);
+        tokenManager.add(id, token);
         response.setHeader("token", token);
         return ret;
     }

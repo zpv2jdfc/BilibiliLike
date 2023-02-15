@@ -1,6 +1,8 @@
 package com.bilibili.controller;
 
+import com.bilibili.config.MQService;
 import com.bilibili.vo.FileVo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +12,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/file")
 public class SubmitController {
+
+    @Autowired
+    private MQService mqService;
 
     @Value("${base.param.tempLocation}")
     private String tempLoc;
@@ -35,8 +40,8 @@ public class SubmitController {
 
     /**
      * 检查 分片是否存在
-     * @param md5File
-     * @param chunk
+     * @param fileVo
+     * @param header
      * @return
      */
     @PostMapping("checkChunk")
@@ -103,7 +108,8 @@ public class SubmitController {
                 }
                 inputStream.close();
             }
-            //合并完，要删除md5目录及临时文件，节省空间。这里代码省略
+            //合并完成， 开始转码
+            mqService.pushOneWayMessage(fileVo.getMd5File());
 
         } catch (Exception e) {
             return false;
