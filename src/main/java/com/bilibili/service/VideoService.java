@@ -22,7 +22,12 @@ public interface VideoService {
     List<Map> getBiu(long id, int begin, int end);
     int addBiu(BarrageVo vo);
     List<Map>getComment(long videoId);
-    public int addComment(long videoId, String content, Date commentTime);
-    public int addSubComment(long videoId, long parentId, long reply, String content, String replyName, String replyUrl, Date commentTime);
+    public int addComment(long videoId, String content, Date commentTime, long userId);
+    public int addSubComment(long videoId, long parentId, long reply, String content, String replyName, String replyUrl, Date commentTime, long userId);
     public VideoVo getVideoById(long videoId);
+
+    public List<VideoVo> getRecommendVideo(int page);
+    public List<VideoVo> getFirstPageVideo();
+
+    public List<VideoVo> getRecommendVideo();
 }

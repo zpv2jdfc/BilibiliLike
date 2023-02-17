@@ -4,13 +4,17 @@ package com.bilibili.service.Impl;
 import com.bilibili.common.constant.CodeEnum;
 import com.bilibili.common.utils.ReturnData;
 import com.bilibili.dao.UserMapper;
+import com.bilibili.dao.VideoMapper;
 import com.bilibili.entity.UserEntity;
 import com.bilibili.service.UserService;
+import com.bilibili.vo.UserInfoVo;
+import com.bilibili.vo.VideoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -18,6 +22,8 @@ import java.util.regex.Pattern;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private VideoMapper videoMapper;
 
     private Map<String, String> entityToTable = new HashMap<>();
     private static final String nickname = "nickname";
@@ -56,15 +62,17 @@ public class UserServiceImpl implements UserService {
             return ReturnData.error(CodeEnum.USER_NOTEXIST.getCode(), CodeEnum.USER_NOTEXIST.getMessage());
         }
         ReturnData ret = ReturnData.ok();
+        List<VideoVo> videoList = this.videoMapper.getVideoByUserId(id);
         Map map = new HashMap();
         map.put("id", userEntity.getId());
         map.put("nickName", userEntity.getNickName());
         map.put("avatar", userEntity.getAvatar());
-        map.put("signature", userEntity.getSingature());
+        map.put("signature", userEntity.getSignature());
         map.put("level", userEntity.getLevel());
         map.put("privilege", userEntity.getPrivilege());
         map.put("status", userEntity.getStatus());
         map.put("setting", userEntity.getSetting());
+        map.put("videoList", videoList);
         ret.setData(map);
         return ret;
     }
@@ -117,5 +125,16 @@ public class UserServiceImpl implements UserService {
             return value.matches("[0-1]+");
         }
         return false;
+    }
+
+    @Override
+    public ReturnData updateUserIndo(UserInfoVo vo){
+        this.userMapper.updateUserInfo(vo);
+        return ReturnData.ok();
+    }
+    @Override
+    public ReturnData updateAvatar(UserInfoVo vo){
+        this.userMapper.updateAvatar(vo);
+        return ReturnData.ok();
     }
 }

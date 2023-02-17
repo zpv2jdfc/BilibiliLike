@@ -15,7 +15,7 @@
         <id property="id" column="id" />
         <result property="nickName" column="user_nickname" />
         <result property="avatar" column="user_avatar" />
-        <result property="signature" column="user_signature" />
+        <result property="signature" column="user_singature" />
         <result property="level" column="user_level" />
         <result property="privilege" column="user_privilege" />
         <result property="status" column="user_status" />

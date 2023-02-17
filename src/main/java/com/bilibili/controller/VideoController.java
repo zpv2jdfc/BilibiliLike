@@ -72,22 +72,24 @@ public class VideoController {
         return ReturnData.ok();
     }
     @PostMapping(value = "addComment")
-    public ReturnData addComment(@RequestBody CommentVo vo) throws ParseException {
+    public ReturnData addComment(@RequestBody CommentVo vo, @RequestHeader Map<String,String> header) throws ParseException {
         if(vo.getContent()==null || vo.getContent().length()==0){
             ReturnData res = ReturnData.error(CodeEnum.NO_COMMENT_EXCEPTION.getCode(), CodeEnum.NO_COMMENT_EXCEPTION.getMessage());
             return res;
         }
-        int res = videoService.addComment(vo.getVideoId(), vo.getContent(), vo.getCommentTime());
+        long userId = Long.parseLong(header.get("id"));
+        int res = videoService.addComment(vo.getVideoId(), vo.getContent(), vo.getCommentTime(), userId);
         return ReturnData.ok();
 
     }
     @PostMapping(value = "addSubComment")
-    public ReturnData addSubComment(@RequestBody CommentVo vo) throws ParseException {
+    public ReturnData addSubComment(@RequestBody CommentVo vo, @RequestHeader Map<String,String> header) throws ParseException {
         if(vo.getContent()==null || vo.getContent().length()==0){
             ReturnData res = ReturnData.error(CodeEnum.NO_COMMENT_EXCEPTION.getCode(), CodeEnum.NO_COMMENT_EXCEPTION.getMessage());
             return res;
         }
-        int res = videoService.addSubComment(vo.getVideoId(),vo.getParentId(),vo.getReplyId(), vo.getContent(), vo.getReplyName(), vo.getReplyUrl(), vo.getCommentTime());
+        long userId = Long.parseLong(header.get("id"));
+        int res = videoService.addSubComment(vo.getVideoId(),vo.getParentId(),vo.getReplyId(), vo.getContent(), vo.getReplyName(), vo.getReplyUrl(), vo.getCommentTime(),userId);
         return ReturnData.ok();
 
     }
@@ -96,6 +98,22 @@ public class VideoController {
         List<Map> data = videoService.getComment(videoId);
         ReturnData res = ReturnData.ok();
         res.setData(data);
+        return res;
+    }
+
+    @GetMapping(value = "homeScroll")
+    public ReturnData getVideos(@RequestParam("page") int page){
+        List<VideoVo> list = this.videoService.getRecommendVideo(page);
+        ReturnData res = ReturnData.ok();
+        res.setData(list);
+        return res;
+    }
+
+    @GetMapping(value = "firstPageVideo")
+    public ReturnData getFirstVideos(){
+        List<VideoVo> list = this.videoService.getFirstPageVideo();
+        ReturnData res = ReturnData.ok();
+        res.setData(list);
         return res;
     }
 }

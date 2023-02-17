@@ -26,4 +26,6 @@ public class VideoVo {
     private Timestamp upTime;
     private String tags;
     private String intro;
+    private String cover;
+    private UserProfileVo owner;
 }

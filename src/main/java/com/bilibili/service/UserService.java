@@ -1,6 +1,7 @@
 package com.bilibili.service;
 
 import com.bilibili.common.utils.ReturnData;
+import com.bilibili.vo.UserInfoVo;
 import com.bilibili.vo.UserLoginVo;
 import com.bilibili.vo.UserRegisterVo;
 
@@ -21,4 +22,6 @@ public interface UserService {
     /** 用户查看其他人的基本信息 **/
     default ReturnData getOtherInfoById(long id){return null;}
     default ReturnData getOtherInfoByName(String name){return null;}
+    ReturnData updateUserIndo(UserInfoVo vo);
+    ReturnData updateAvatar(UserInfoVo vo);
 }

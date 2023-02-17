@@ -7,7 +7,7 @@ public class UserEntity {
     private long id;
     private String nickName = "匿名用户";
     private String avatar = "default";
-    private String singature = "";
+    private String signature = "";
 //    用户等级
     private int level = 0;
 //    会员等级 0普通用户 1会员用户 2高级会员， 默认0

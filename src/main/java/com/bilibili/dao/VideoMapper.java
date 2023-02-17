@@ -45,7 +45,7 @@ public interface VideoMapper {
     public int addBiu(@Param("tableName") String tableName, @Param("videoId") long videoId, @Param("content")String content,@Param("userId") long userId, @Param("time")int time);
 
 //    新增评论
-    @Insert("insert into ${tableName} (video_id,user_id,comment,parent_id,comment_time,reply_id,reply_name,reply_url) values(#{videoId},#{userId},#{content},#{parent},#{commentTime},#{reply}),#{replyName},#{replyUrl}")
+    @Insert("insert into ${tableName} (video_id,user_id,comment,parent_id,comment_time,reply_id,reply_name,reply_url) values(#{videoId},#{userId},#{content},#{parent},#{commentTime},#{reply},#{replyName},#{replyUrl})")
     public int addComment(@Param("tableName")String tableName,
                           @Param("videoId")long videoId,
                           @Param("userId")long userId,
@@ -97,8 +97,8 @@ public interface VideoMapper {
     public UserProfileVo getUserProfileById(@Param("userId")long userId);
 
 //    用户上传视频
-    @Insert("insert into tb_video (title,tags,user_id,duration,like_num,comment_num,preview,release_time,status,create_time,lm_time,cover) " +
-            "values (#{title},#{tags},#{userId},#{duration},#{likeNum},#{commentNum},#{preview},#{releaseTime},#{status},#{createTime},#{lmTime},#{cover})")
+    @Insert("insert into tb_video (title,tags,user_id,duration,like_num,comment_num,preview,release_time,status,create_time,lm_time,cover,url) " +
+            "values (#{title},#{tags},#{userId},#{duration},#{likeNum},#{commentNum},#{preview},#{releaseTime},#{status},#{createTime},#{lmTime},#{cover},#{md5})")
     public int addVideo(@Param("title")String title,
                         @Param("tags")String tags,
                         @Param("userId")long userId,
@@ -109,6 +109,96 @@ public interface VideoMapper {
                         @Param("releaseTime")Timestamp releaseTime,
                         @Param("status")int status,
                         @Param("createTime")Timestamp createTime,
-                        @Param("lmTime")Timestamp lmTime, @Param("cover") byte[] cover, @Param("intro") String intro
+                        @Param("lmTime")Timestamp lmTime, @Param("cover") byte[] cover, @Param("intro") String intro,@Param("md5") String md5
                         );
+//    分页查询视频
+    @Select("select * from tb_video order by like_num desc limit #{start},20")
+    @Results(
+            value = {
+                @Result(column = "id", property = "videoId", id = true),
+                @Result(column = "title", property = "videoTitle"),
+                @Result(column = "user_id", property = "userId"),
+                @Result(column = "duration", property = "duration"),
+                @Result(column = "url", property = "url"),
+                @Result(column = "like_num", property = "likeNum"),
+                @Result(column = "play_num", property = "playNum"),
+                @Result(column = "biu_num", property = "biuNum"),
+                @Result(column = "comment_num", property = "commentNum"),
+                @Result(column = "release_time", property = "upTime"),
+                @Result(column = "tags", property = "tags"),
+                @Result(column = "intro", property = "intro"),
+                @Result(column = "user_id", property = "owner", javaType = UserProfileVo.class,
+                        one = @One(select = "com.bilibili.dao.VideoMapper.getUserProfileById")
+                )
+            }
+    )
+    public List<VideoVo> getVideoPage(@Param("start")int start);
+//    第一页的视频
+@Select("select * from tb_video order by like_num desc limit 40")
+@Results(
+        value = {
+                @Result(column = "id", property = "videoId", id = true),
+                @Result(column = "title", property = "videoTitle"),
+                @Result(column = "user_id", property = "userId"),
+                @Result(column = "duration", property = "duration"),
+                @Result(column = "url", property = "url"),
+                @Result(column = "like_num", property = "likeNum"),
+                @Result(column = "play_num", property = "playNum"),
+                @Result(column = "biu_num", property = "biuNum"),
+                @Result(column = "comment_num", property = "commentNum"),
+                @Result(column = "release_time", property = "upTime"),
+                @Result(column = "tags", property = "tags"),
+                @Result(column = "intro", property = "intro"),
+                @Result(column = "cover", property = "cover"),
+                @Result(column = "user_id", property = "owner", javaType = UserProfileVo.class,
+                        one = @One(select = "com.bilibili.dao.VideoMapper.getUserProfileById")
+                )
+        }
+)
+public List<VideoVo> getFirstPageVideo();
+
+//推荐视频
+    @Select("select * from tb_recommend")
+    @Results(
+            value = {
+                    @Result(column = "id", property = "videoId", id = true),
+                    @Result(column = "title", property = "videoTitle"),
+                    @Result(column = "user_id", property = "userId"),
+                    @Result(column = "duration", property = "duration"),
+                    @Result(column = "url", property = "url"),
+                    @Result(column = "like_num", property = "likeNum"),
+                    @Result(column = "play_num", property = "playNum"),
+                    @Result(column = "biu_num", property = "biuNum"),
+                    @Result(column = "comment_num", property = "commentNum"),
+                    @Result(column = "release_time", property = "upTime"),
+                    @Result(column = "tags", property = "tags"),
+                    @Result(column = "intro", property = "intro"),
+                    @Result(column = "cover", property = "cover"),
+                    @Result(column = "user_id", property = "owner", javaType = UserProfileVo.class,
+                            one = @One(select = "com.bilibili.dao.VideoMapper.getUserProfileById")
+                    )
+            }
+    )
+    public List<VideoVo> getRecomendVideo();
+
+//    根据用户id获取视屏
+//    根据id获取视频信息
+@Select("select * from tb_video where user_id = #{id}")
+@Results(
+        value = {
+                @Result(column = "id", property = "videoId", id = true),
+                @Result(column = "title", property = "videoTitle"),
+                @Result(column = "user_id", property = "userId"),
+                @Result(column = "duration", property = "duration"),
+                @Result(column = "url", property = "url"),
+                @Result(column = "like_num", property = "likeNum"),
+                @Result(column = "play_num", property = "playNum"),
+                @Result(column = "biu_num", property = "biuNum"),
+                @Result(column = "comment_num", property = "commentNum"),
+                @Result(column = "release_time", property = "upTime"),
+                @Result(column = "tags", property = "tags"),
+                @Result(column = "intro", property = "intro"),
+        }
+)
+    List<VideoVo> getVideoByUserId(@Param("id") long userId);
 }

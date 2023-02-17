@@ -58,8 +58,8 @@ public class LogServiceImpl implements LogService {
         Map data = new HashMap();
         data.put("id", id);
         data.put("name", userEntity.getNickName());
-        data.put("singature", userEntity.getAvatar());
-        data.put("avatar", userEntity.getSingature());
+        data.put("singature", userEntity.getSignature());
+        data.put("avatar", userEntity.getAvatar());
         data.put("level", userEntity.getLevel());
         data.put("privilege", userEntity.getPrivilege());
         data.put("status", userEntity.getStatus());
@@ -90,7 +90,7 @@ public class LogServiceImpl implements LogService {
         data.put("id", userEntity.getId());
         data.put("nickName",userEntity.getNickName());
         data.put("avatar",userEntity.getAvatar());
-        data.put("signature",userEntity.getSingature());
+        data.put("signature",userEntity.getSignature());
         data.put("level",userEntity.getLevel());
         data.put("privilege",userEntity.getPrivilege());
         data.put("status",userEntity.getStatus());

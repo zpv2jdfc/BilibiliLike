@@ -1,6 +1,7 @@
 package com.bilibili.dao;
 
 import com.bilibili.entity.UserEntity;
+import com.bilibili.vo.UserInfoVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -17,4 +18,10 @@ public interface UserMapper {
     public int checkExist(@Param("id")long id);
     @Update("update user set ${fieldname} = #{newvalue}, lm_time = #{time}  where id = #{id}")
     public int updateUser(@Param("id")long id,@Param("fieldname")String fieldname,@Param("newvalue")String newvalue,@Param("time")java.util.Date time);
+
+    @Update("update user set user_nickname = #{user.name}, user_singature = #{user.signature} where id = #{user.id}")
+    public int updateUserInfo(@Param("user")UserInfoVo vo);
+
+    @Update("update user set user_avatar = #{user.avatar} where id = #{user.id}")
+    public int updateAvatar(@Param("user")UserInfoVo vo);
 }

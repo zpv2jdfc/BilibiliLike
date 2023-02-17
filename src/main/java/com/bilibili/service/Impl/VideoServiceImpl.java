@@ -42,18 +42,16 @@ public class VideoServiceImpl implements VideoService {
 
 
     @Override
-    public int addComment(long videoId, String content, Date commentTime) {
+    public int addComment(long videoId, String content, Date commentTime, long userId) {
         String tableName = "tb_video_comment" + videoId/10000;
-        long userId = 0;
         long parent = -1;
 
         int res = videoMapper.addComment(tableName, videoId, userId, content, parent, -1, new Timestamp(commentTime.getTime()),"","");
         return res;
     }
     @Override
-    public int addSubComment(long videoId, long parentId, long reply, String content, String replyName, String replyUrl, Date commentTime) {
+    public int addSubComment(long videoId, long parentId, long reply, String content, String replyName, String replyUrl, Date commentTime, long userId) {
         String tableName = "tb_video_comment" + videoId/10000;
-        long userId = 0;
         long parent = parentId;
         int res = videoMapper.addComment(tableName, videoId, userId, content, parent, reply, new Timestamp(commentTime.getTime()),replyName, replyUrl);
         return res;
@@ -95,7 +93,27 @@ public class VideoServiceImpl implements VideoService {
     @Override
     public ReturnData upload(UploadVideoVo vo){
         this.videoMapper.addVideo(vo.getTitle(),vo.getTags(),vo.getUserId(),vo.getDuration(),vo.getLikeNum(),vo.getCommentNum(),vo.getPreview(),vo.getReleaseTime(),
-                vo.getStatus(),vo.getCreateTime(),vo.getLmTime(),vo.getCover(),vo.getIntro());
+                vo.getStatus(),vo.getCreateTime(),vo.getLmTime(),vo.getCover(),vo.getIntro(),vo.getMd5());
         return ReturnData.ok();
+    }
+
+    @Override
+    public List<VideoVo> getRecommendVideo(int page){
+        List<VideoVo> list = videoMapper.getVideoPage(40+0*page);
+        return list;
+    }
+    @Override
+    public List<VideoVo> getFirstPageVideo(){
+        List<VideoVo> list = videoMapper.getFirstPageVideo();
+        return list;
+    }
+
+    @Override
+    public List<VideoVo> getRecommendVideo(){
+        List<VideoVo> videoList = this.videoMapper.getRecomendVideo();
+        List<VideoVo> res = new ArrayList<>();
+        for(int i=0;i<6 && i<videoList.size();++i)
+            res.add(videoList.get(i));
+        return res;
     }
 }

@@ -27,6 +27,8 @@ public class UploadVideoVo {
 
     private byte[] cover;
 
+    private String md5;
+
     @JsonProperty(value = "descript")
     private String intro;
     public UploadVideoVo(){
