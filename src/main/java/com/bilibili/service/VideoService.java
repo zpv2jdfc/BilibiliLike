@@ -30,4 +30,5 @@ public interface VideoService {
     public List<VideoVo> getFirstPageVideo();
 
     public List<VideoVo> getRecommendVideo();
+    public List<VideoVo> getALlVideoByTitle(String title);
 }

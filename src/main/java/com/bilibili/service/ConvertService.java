@@ -34,11 +34,13 @@ public class ConvertService implements RocketMQListener<String>{
     @Override
     public void onMessage(String message) {
         System.out.println(message);
+        if (1==1)
+        return;
 //        FFmpegProcessor.convertMediaToM3u8ByHttp(inputStream, m3u8Url, infoUrl);
         doConversions(new File(tempLoc+"/"+message+"/complete.mp4"), message);
     }
 
-//        视频转码
+//        视频转码,  不好用
     public  void convertMediaToM3u8ByHttp(InputStream inputStream, String m3u8Url, String infoUrl) throws IOException {
 
         avutil.av_log_set_level(avutil.AV_LOG_INFO);

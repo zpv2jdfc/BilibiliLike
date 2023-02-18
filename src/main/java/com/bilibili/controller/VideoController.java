@@ -116,4 +116,12 @@ public class VideoController {
         res.setData(list);
         return res;
     }
+
+    @GetMapping(value = "all")
+    public ReturnData getAll(@RequestParam("title")String title){
+        ReturnData res = new ReturnData().ok();
+        List<VideoVo> l = this.videoService.getALlVideoByTitle(title);
+        res.setData(l);
+        return res;
+    }
 }

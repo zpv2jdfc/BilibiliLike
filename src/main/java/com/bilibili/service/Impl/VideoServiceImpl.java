@@ -116,4 +116,10 @@ public class VideoServiceImpl implements VideoService {
             res.add(videoList.get(i));
         return res;
     }
+
+    @Override
+    public List<VideoVo> getALlVideoByTitle(String title){
+        List<VideoVo> videoVoList = this.videoMapper.getALlVideoByTitle(title);
+        return videoVoList;
+    }
 }

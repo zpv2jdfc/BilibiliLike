@@ -201,4 +201,27 @@ public List<VideoVo> getFirstPageVideo();
         }
 )
     List<VideoVo> getVideoByUserId(@Param("id") long userId);
+
+//根据标题搜索视频
+    @Select("select * from tb_video where title like '%${title}%'")
+    @Results(
+            value = {
+                    @Result(column = "id", property = "videoId", id = true),
+                    @Result(column = "title", property = "videoTitle"),
+                    @Result(column = "user_id", property = "userId"),
+                    @Result(column = "duration", property = "duration"),
+                    @Result(column = "url", property = "url"),
+                    @Result(column = "like_num", property = "likeNum"),
+                    @Result(column = "play_num", property = "playNum"),
+                    @Result(column = "biu_num", property = "biuNum"),
+                    @Result(column = "comment_num", property = "commentNum"),
+                    @Result(column = "release_time", property = "upTime"),
+                    @Result(column = "tags", property = "tags"),
+                    @Result(column = "intro", property = "intro"),
+                    @Result(column = "user_id", property = "owner", javaType = UserProfileVo.class,
+                            one = @One(select = "com.bilibili.dao.VideoMapper.getUserProfileById")
+                    )
+            }
+    )
+    List<VideoVo> getALlVideoByTitle(@Param("title")String title);
 }
