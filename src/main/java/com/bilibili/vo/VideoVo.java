@@ -23,7 +23,7 @@ public class VideoVo {
     private int biuNum;
     private int commentNum;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Timestamp upTime;
+    private Date upTime;
     private String tags;
     private String intro;
     private String cover;

@@ -101,9 +101,9 @@ public class LogServiceImpl implements LogService {
     private static boolean checkIdentify(String identitytype, String identifier, String credential){
         if(identitytype==null || credential==null)
             return false;
-//        邮箱登录
+//        用户名登录
         if(identitytype.equals(LogType.PASSWORD.getCode())){
-            if(credential.length()<5 || credential.length()>=256 || identifier==null)
+            if(credential.length()<3 || credential.length()>=256 || identifier==null)
                 return false;
 
             return true;
