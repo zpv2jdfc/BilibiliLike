@@ -4,10 +4,10 @@ base:
   param:
     homePage: "redirect:http://www.bilibili.com"
     loginPage: "redirect:http://auth.bilibili.com/login.html"
-    tempLocation: "C:/Users/79301/Desktop/file/"
-    fileLocation: "C:/Users/79301/Desktop/file/"
-#    tempLocation: "/root/bili/src/video/"
-#    fileLocation: "/root/bili/src/video/"
+#    tempLocation: "C:/Users/79301/Desktop/file/"
+#    fileLocation: "C:/Users/79301/Desktop/file/"
+    tempLocation: "/root/bili/src/video/"
+    fileLocation: "/root/bili/src/video/"
 spring:
   mail:
     host: smtp.qq.com #发送邮件服务器
@@ -30,10 +30,10 @@ spring:
 #    type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://localhost:3306/bilibili?characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     username: root
-    password: 123
+    password: vming793012545
     driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
-    host: 1.116.112.80
+    host: 127.0.0.1
     port: 16379
     timeout: 20000
     pool:
@@ -52,7 +52,7 @@ server:
 #rocketmq配置信息
 rocketmq:
   #nameservice服务器地址（多个以英文逗号隔开）
-  name-server: 1.116.112.80:9876
+  name-server: 127.0.0.1:9876
   #生产者配置
   producer:
     #组名

@@ -20,7 +20,7 @@ public class CommentVo {
 
     @JsonProperty(value = "dateTime")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    Timestamp commentTime;
+    Date commentTime;
 
     @JsonProperty(value = "userId")
     long userId;
