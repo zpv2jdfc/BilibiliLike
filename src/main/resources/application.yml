@@ -1,10 +1,24 @@
+logging:
+  config: classpath:logback.xml
 base:
   param:
     homePage: "redirect:http://www.bilibili.com"
     loginPage: "redirect:http://auth.bilibili.com/login.html"
     tempLocation: "C:/Users/79301/Desktop/file/"
     fileLocation: "C:/Users/79301/Desktop/file/"
+#    tempLocation: "/root/bili/src/video/"
+#    fileLocation: "/root/bili/src/video/"
 spring:
+  mail:
+    host: smtp.qq.com #发送邮件服务器
+    username: 793012545@qq.com #发送邮件的邮箱地址
+    nickname: 模仿Bilibli的视频弹幕网站
+    password: wovdlxsmjagabbjd #客户端授权码
+    from: 793012545@qq.com # 发送邮件的地址，和上面username一致
+    properties.mail.smtp.starttls.enable: true
+    properties.mail.smtp.starttls.required: true
+    properties.mail.smtp.ssl.enable: true
+    default-encoding: utf-8
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss

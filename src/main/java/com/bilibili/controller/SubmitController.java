@@ -1,13 +1,23 @@
 package com.bilibili.controller;
 
+import com.bilibili.annotation.PerimissionAnnotation;
+import com.bilibili.common.utils.ReturnData;
 import com.bilibili.config.MQService;
+import com.bilibili.config.RedisUtils;
+import com.bilibili.dao.VideoMapper;
 import com.bilibili.vo.FileVo;
+import com.bilibili.vo.VideoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicStampedReference;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/file")
@@ -15,6 +25,10 @@ public class SubmitController {
 
     @Autowired
     private MQService mqService;
+    @Autowired
+    private RedisUtils redisUtils;
+    @Autowired
+    private VideoMapper videoMapper;
 
     @Value("${base.param.tempLocation}")
     private String tempLoc;
@@ -22,39 +36,43 @@ public class SubmitController {
     @Value("${base.param.fileLocation}")
     private String fileLoc;
 
+    private final String existFile = "existFile";
+    private final String existChunk = "existChunk";
     /**
      * 检查文件是否存在
      * @param md5File
      * @return
      */
-    @PostMapping("checkFile")
+    @GetMapping ("checkFile")
     public Boolean checkFile(@RequestParam(value = "md5File") String md5File){
         Boolean exist = false;
-
-        //实际项目中，这个md5File唯一值，应该保存到数据库或者缓存中，通过判断唯一值存不存在，来判断文件存不存在，这里我就不演示了
-		/*if(true) {
-			exist = true;
-		}*/
-        return exist;
+        exist = redisUtils.sIsMember(existFile, md5File);
+        if(exist)
+            return true;
+        Integer temp = videoMapper.getVideoByUrl(md5File);
+        if(temp==null)
+            return false;
+        redisUtils.sAdd(existFile, md5File);
+        return true;
     }
 
     /**
      * 检查 分片是否存在
-     * @param fileVo
+     * @param md5File
      * @param header
      * @return
      */
-    @PostMapping("checkChunk")
+    @GetMapping("checkChunk")
     @ResponseBody
-    public Boolean checkChunk(@RequestBody FileVo fileVo, @RequestHeader Map<String,String> header) {
-        Boolean exist = false;
-        String path = this.tempLoc + fileVo.getMd5File() + "/";//分片存放目录
-        String chunkName =  fileVo.getChunk()+ ".tmp";//分片名
-        File file = new File(path+chunkName);
-        if (file.exists()) {
-            exist = true;
+    public ReturnData checkChunk(@RequestParam(value = "md5File") String md5File, @RequestHeader Map<String,String> header) {
+        List l = new ArrayList();
+        if(redisUtils.hExists(existChunk, md5File)){
+            l = (List) redisUtils.hGet(existChunk, md5File);
         }
-        return exist;
+
+        ReturnData res = new ReturnData().ok();
+        res.setData(l);
+        return res;
     }
 
     /**
@@ -64,6 +82,7 @@ public class SubmitController {
      * @return
      */
     @PostMapping(value = "upload")
+    @PerimissionAnnotation
     public Boolean uploadChunk(FileVo fileVo, @RequestHeader Map<String,String> header){
         String path = this.tempLoc + fileVo.getMd5File();
         File dirfile = new File(path);
@@ -73,6 +92,7 @@ public class SubmitController {
         String chunkName = fileVo.getChunk() + ".tmp";
         String filePath = path+"/"+chunkName;
         File savefile = new File(filePath);
+        System.out.println(fileVo.getChunk());
         try {
             if (!savefile.exists()) {
                 savefile.createNewFile();//文件不存在，则创建
@@ -81,6 +101,15 @@ public class SubmitController {
         } catch (IOException e) {
             return false;
         }
+        List l = new ArrayList();
+        synchronized (fileVo.getMd5File().intern()){
+            if(redisUtils.hExists(existChunk, fileVo.getMd5File())){
+                l = (List) redisUtils.hGet(existChunk, fileVo.getMd5File());
+            }
+            l.add(fileVo.getChunk());
+            redisUtils.hSet(existChunk, fileVo.getMd5File(), l);
+        }
+
         return true;
     }
 
@@ -94,6 +123,7 @@ public class SubmitController {
     @PostMapping(value = "merge")
     @ResponseBody
     public Boolean  merge(@RequestBody FileVo fileVo, @RequestHeader Map<String,String> header) throws Exception {
+        redisUtils.sAdd(existFile, fileVo.getMd5File());
         String path = this.tempLoc + fileVo.getMd5File() + "/";
         FileOutputStream fileOutputStream = new FileOutputStream(path+"/complete.mp4");  //合成后的文件
         try {

@@ -27,8 +27,8 @@ public class HomeController {
         List<Map> carsouels = new ArrayList<>();
         Map<String,String> carsouel = new HashMap<>();
         carsouel.put("url","https://i0.hdslb.com/bfs/banner/d595ef5e47a5eac9c6e99c6ba28af5dcfbfdeb98.png@976w_550h_1c_!web-home-carousel-cover.avif");
-        carsouel.put("caption","caption");
-        carsouel.put("link","www.bilibili.com");
+        carsouel.put("caption","注意安全");
+        carsouel.put("link","/");
         carsouels.add(carsouel);
 //        6个推荐视频
         List grids = videoService.getRecommendVideo();

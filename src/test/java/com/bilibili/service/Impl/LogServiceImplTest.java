@@ -18,4 +18,15 @@ public class LogServiceImplTest extends BaseServiceTest {
     public void createUser() {
         logService.createUser("sass","PASSWORD",null,"123456");
     }
+
+    @Test
+    public void sendMail(){
+        logService.sendVerifyMail("793012545@qq.com");
+    }
+
+    @Test
+    public void emailLog(){
+
+
+    }
 }

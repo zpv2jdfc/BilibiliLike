@@ -1,5 +1,6 @@
 package com.bilibili.config;
 
+import com.bilibili.interceptor.BaseInterceptor;
 import com.bilibili.interceptor.LogInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 public class InterceptorConfiguration implements WebMvcConfigurer {
     @Autowired
     private LogInterceptor logInterceptor;
+    @Autowired
+    private BaseInterceptor baseInterceptor;
 //   CORS
 //    @Bean
 //    public WebMvcConfigurer corsConfigurer() {
@@ -26,6 +29,7 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(logInterceptor).addPathPatterns("/user/**");
+        registry.addInterceptor(baseInterceptor).addPathPatterns("/video/watch/**");
         WebMvcConfigurer.super.addInterceptors(registry);
     }
 }

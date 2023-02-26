@@ -8,7 +8,7 @@
         tb_video
     </sql>
     <resultMap id="videomap" type="videoentity">
-        <id property="id" column="id" />
+        <id property="id" column="bvcode" />
         <result property="title" column="title" />
         <result property="tags" column="tags" />
         <result property="userId" column="userId" />
@@ -24,6 +24,6 @@
     <select id="getById" resultMap="videomap">
         SELECT <include refid="allColumn"></include>
         FROM <include refid="tableName"></include>
-        WHERE id = #{id}
+        WHERE bvcode = #{id}
     </select>
 </mapper>

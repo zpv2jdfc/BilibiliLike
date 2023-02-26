@@ -1,9 +1,11 @@
 package com.bilibili.vo;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -17,7 +19,8 @@ public class CommentVo {
     String content;
 
     @JsonProperty(value = "dateTime")
-    Date commentTime;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    Timestamp commentTime;
 
     @JsonProperty(value = "userId")
     long userId;

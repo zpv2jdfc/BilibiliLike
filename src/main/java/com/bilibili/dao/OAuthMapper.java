@@ -1,6 +1,7 @@
 package com.bilibili.dao;
 
 import com.bilibili.entity.OAuthEntity;
+import com.bilibili.entity.UserEntity;
 import org.apache.ibatis.annotations.*;
 
 @Mapper
@@ -34,4 +35,23 @@ public interface OAuthMapper {
             @Result(property = "credential", column = "credential"),
     })
     OAuthEntity getUserByCredential(@Param("entity") OAuthEntity entity);
+
+    @Select("select 1 from oauth where identity_type = 'EMAIL' and identifier = #{email}")
+    Integer emailUserExists(@Param("email")String email);
+
+    @Select("select * from user where id = (select user_id from oauth where identity_type = 'EMAIL' and identifier = #{email})")
+    @Results(
+            value = {
+                    @Result(column = "id", property = "id"),
+                    @Result(column = "user_nickname", property = "nickName"),
+                    @Result(column = "user_avatar", property = "avatar"),
+                    @Result(column = "user_singature", property = "signature"),
+                    @Result(column = "user_level", property = "level"),
+                    @Result(column = "user_privilege", property = "privilege"),
+                    @Result(column = "user_status", property = "status"),
+                    @Result(column = "user_setting", property = ""),
+                    @Result(column = "setting", property = "setting"),
+            }
+    )
+    UserEntity getUserInfoByEmail(@Param("email")String email);
 }

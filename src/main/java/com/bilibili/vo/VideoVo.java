@@ -18,8 +18,8 @@ public class VideoVo {
     private long userId;
     private int duration;
     private String url;
-    private int likeNum;
-    private int playNum;
+    private long likeNum;
+    private long playNum;
     private int biuNum;
     private int commentNum;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -28,4 +28,6 @@ public class VideoVo {
     private String intro;
     private String cover;
     private UserProfileVo owner;
+    private double temperature = 0;
+    private long bvcode;
 }

@@ -13,5 +13,5 @@ public class UserRegisterVo {
     private String identitytype;
     private String identifier;
     private String credential;
-
+    private String verificationCode;
 }

@@ -1,9 +1,11 @@
 package com.bilibili.service;
 
+import com.bilibili.config.MQService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.bytedeco.ffmpeg.global.avcodec;
@@ -25,6 +27,8 @@ import java.nio.file.Paths;
 @RocketMQMessageListener(consumerGroup = "${rocketmq.consumer.group}", topic = "${rocketmq.consumer.topic}")
 public class ConvertService implements RocketMQListener<String>{
 
+    @Autowired
+    private MQService mqService;
 //        转码后的音频文件位置
     @Value("${base.param.tempLocation}")
     private String tempLoc;
@@ -34,8 +38,6 @@ public class ConvertService implements RocketMQListener<String>{
     @Override
     public void onMessage(String message) {
         System.out.println(message);
-        if (1==1)
-        return;
 //        FFmpegProcessor.convertMediaToM3u8ByHttp(inputStream, m3u8Url, infoUrl);
         doConversions(new File(tempLoc+"/"+message+"/complete.mp4"), message);
     }

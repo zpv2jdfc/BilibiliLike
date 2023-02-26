@@ -3,6 +3,7 @@ package com.bilibili.service;
 import com.bilibili.common.utils.ReturnData;
 import com.bilibili.vo.BarrageVo;
 import com.bilibili.vo.UploadVideoVo;
+import com.bilibili.vo.UserProfileVo;
 import com.bilibili.vo.VideoVo;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,4 +32,5 @@ public interface VideoService {
 
     public List<VideoVo> getRecommendVideo();
     public List<VideoVo> getALlVideoByTitle(String title);
+    public Map getUserByBVCode(long BVCode);
 }

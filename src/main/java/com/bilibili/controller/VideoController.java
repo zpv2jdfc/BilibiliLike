@@ -3,11 +3,19 @@ package com.bilibili.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.bilibili.common.constant.CodeEnum;
+import com.bilibili.common.utils.BloomFilterHelper;
 import com.bilibili.common.utils.ReturnData;
+import com.bilibili.config.RedisUtils;
+import com.bilibili.dao.VideoMapper;
+import com.bilibili.service.RankService;
 import com.bilibili.service.VideoService;
 import com.bilibili.vo.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Param;
 import org.hibernate.validator.constraints.CodePointLength;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -18,24 +26,33 @@ import sun.java2d.pipe.SpanShapeRenderer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import java.lang.reflect.Proxy;
 import java.sql.Blob;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import static com.bilibili.common.constant.VideoConstant.uploadStatus;
 
+@Slf4j
 @RestController
 @RequestMapping("video")
 public class VideoController {
     @Autowired
     private VideoService videoService;
+    @Autowired
+    private RankService rankService;
+    @Autowired
+    private RedisUtils redisUtils;
+    @Autowired
+    private VideoMapper videoMapper;
 
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
+    private final String bvToId = "bvToId:";
     @PostMapping(value = "upload")
     public Map upLoadVideo( UploadVideoVo vo, @RequestHeader Map<String,String> header){
 
@@ -44,9 +61,34 @@ public class VideoController {
     }
 
     @GetMapping(value = "watch/{videoId}")
-    public ReturnData getVideo(@PathVariable("videoId") String videoId){
+    public ReturnData getVideo(@PathVariable("videoId") String videoId, HttpServletRequest request){
+//        VideoService serviceProxy = (VideoService) Proxy.newProxyInstance(this.videoService.getClass().getClassLoader(),
+//                this.videoService.getClass().getInterfaces(),
+//                (a,b,c)->{
+//            if(b.getName().equals("getVideoById")){
+//                VideoVo vo  = (VideoVo)b.invoke(this.videoService,c);
+//
+//            }
+//            return b.invoke(this.videoService,c);
+//        });
+
         if(videoId==null || !videoId.matches("[0-9]+")){
             return ReturnData.error(CodeEnum.NO_VIDEO_EXCEPTION.getCode(), CodeEnum.NO_VIDEO_EXCEPTION.getMessage());
+        }
+
+        String ip = request.getRemoteAddr();
+        int ipInt = 0;
+        for(String temp : ip.split("\\.")){
+            ipInt = ipInt*256 + Integer.parseInt(temp);
+        }
+        if(!this.redisUtils.sIsMember("watchHistory", videoId+":"+ipInt)) {
+            long id = -1;
+            if(this.redisUtils.hasKey(bvToId+videoId)){
+                id = (Long)redisUtils.get(bvToId+videoId);
+            }else {
+                id = this.videoMapper.getIdByBVCode(Long.parseLong(videoId));
+            }
+            this.rankService.watchVideo(id, System.currentTimeMillis());
         }
         VideoVo vo = videoService.getVideoById(Long.parseLong(videoId));
         if(vo==null){
@@ -57,8 +99,8 @@ public class VideoController {
         return res;
     }
     @GetMapping(value = "getbiu")
-    public ReturnData getBiu(@RequestParam("videoId")long videoId, @RequestParam("begin")int begin, @RequestParam("end")int end){
-        List biuList = this.videoService.getBiu(videoId,begin,end);
+    public ReturnData getBiu(@RequestParam("videoId")long bvcode, @RequestParam("begin")int begin, @RequestParam("end")int end){
+        List biuList = this.videoService.getBiu(bvcode,begin,end);
         if(biuList!=null){
             ReturnData res = new ReturnData().ok();
             res.setData(biuList);
@@ -72,7 +114,7 @@ public class VideoController {
         return ReturnData.ok();
     }
     @PostMapping(value = "addComment")
-    public ReturnData addComment(@RequestBody CommentVo vo, @RequestHeader Map<String,String> header) throws ParseException {
+    public ReturnData addComment(@RequestBody CommentVo vo, @RequestHeader Map<String,String> header) {
         if(vo.getContent()==null || vo.getContent().length()==0){
             ReturnData res = ReturnData.error(CodeEnum.NO_COMMENT_EXCEPTION.getCode(), CodeEnum.NO_COMMENT_EXCEPTION.getMessage());
             return res;
@@ -122,6 +164,38 @@ public class VideoController {
         ReturnData res = new ReturnData().ok();
         List<VideoVo> l = this.videoService.getALlVideoByTitle(title);
         res.setData(l);
+        return res;
+    }
+    @GetMapping(value="hottest")
+    public ReturnData getHottest(){
+        ReturnData res = new ReturnData().ok();
+        List<Map> temp = null;
+        try{
+            temp = rankService.getHottest();
+        }catch (Exception e){
+            log.info(e.getMessage());
+        }
+        List l = new ArrayList();
+        if(temp!=null) {
+            for (Map item : temp) {
+                long id = Long.parseLong(item.get("id").toString());
+                long bvCode = this.videoMapper.getBVCodeById(id);
+                VideoVo vo = this.videoService.getVideoById(bvCode);
+                if(vo==null)
+                    continue;
+                vo.setTemperature(Double.parseDouble(item.get("score").toString()));
+                l.add(vo);
+            }
+        }
+        res.setData(l);
+        return res;
+    }
+    @GetMapping(value = "upInfo")
+    public ReturnData getUpInfo(@Param("code")long code, HttpServletRequest request){
+        ReturnData res = new ReturnData().ok();
+
+        Map vo = this.videoService.getUserByBVCode(code);
+        res.setData(vo);
         return res;
     }
 }

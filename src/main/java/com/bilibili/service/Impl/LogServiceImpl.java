@@ -2,6 +2,7 @@ package com.bilibili.service.Impl;
 
 import com.bilibili.common.constant.CodeEnum;
 import com.bilibili.common.utils.ReturnData;
+import com.bilibili.config.RedisUtils;
 import com.bilibili.dao.OAuthMapper;
 import com.bilibili.dao.UserMapper;
 import com.bilibili.entity.OAuthEntity;
@@ -9,10 +10,16 @@ import com.bilibili.entity.UserEntity;
 import com.bilibili.service.LogService;
 import com.bilibili.vo.UserLoginVo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,10 +29,20 @@ public class LogServiceImpl implements LogService {
     private UserMapper userMapper;
     @Autowired
     private OAuthMapper oAuthMapper;
+    @Autowired
+    private JavaMailSender mailSender;
+    @Autowired
+    private RedisUtils redisUtils;
+
+    @Value("${spring.mail.from}")
+    private String from;
+    @Value("${spring.mail.nickname}")
+    private String nickname;
 
     private enum LogType{
         PASSWORD("PASSWORD"),
         WX("WX"),
+        EMAIL("EMAIL"),
         QQ("QQ");
         public String getCode(){
             return code;
@@ -37,6 +54,8 @@ public class LogServiceImpl implements LogService {
     }
     private static final String defaultName = "匿名用户";
     private static final String regEx =  "[ _`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\n|\r|\t";
+    private final static Pattern partern = Pattern.compile("[a-zA-Z0-9]+[\\.]{0,1}[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z]+");
+
     @Override
     public ReturnData createUser(String name, String identitytype, String identifier, String credential){
         name = defaultName;
@@ -125,4 +144,73 @@ public class LogServiceImpl implements LogService {
         Matcher m = p.matcher(name);
         return !m.find();
     }
+
+    public boolean sendVerifyMail(String to){
+        if(!emailFormat(to))
+            return false;
+        String verificationCode = createVerificationCode(5);
+        this.redisUtils.getTemplate().opsForValue().set("mailRegist:"+to,verificationCode,1800, TimeUnit.SECONDS);
+        StringBuilder content = new StringBuilder();
+        content.append("您的验证码为： ");
+        content.append(verificationCode);
+        content.append("\n验证码将在30分钟后失效");
+        SimpleMailMessage message = new SimpleMailMessage();
+        //邮件发送人
+        message.setFrom(nickname+"<"+this.from+">");
+        //邮件接收人
+        message.setTo(to);
+        //邮件主题
+        message.setSubject("用户注册验证码");
+        //邮件内容
+        message.setText(content.toString());
+        //发送邮件
+        try{
+            mailSender.send(message);
+        }catch (MailException e){
+            return false;
+        }
+        return true;
+    }
+    public ReturnData mailRegist(String email, String verificationCode){
+        if(!emailFormat(email)){
+            return ReturnData.error(20007,"邮箱格式错误");
+        }
+        Object code = this.redisUtils.getTemplate().opsForValue().get("mailRegist:"+email);
+        if(code==null || !verificationCode.equals(code.toString())){
+            return ReturnData.error(CodeEnum.LOGINACCT_VERIFACATIONCODE_EXCEPTION.getCode(), CodeEnum.LOGINACCT_VERIFACATIONCODE_EXCEPTION.getMessage());
+        }
+//        验证通过
+        Integer res = this.oAuthMapper.emailUserExists(email);
+//        用户未注册则注册用户
+        if(res==null){
+            UserEntity userEntity = new UserEntity();
+            userEntity.setNickName(email);
+            userMapper.createUser(userEntity);
+            long id = userEntity.getId();
+            this.oAuthMapper.createUser(id, LogType.EMAIL.getCode(), email, "default");
+        }
+        this.redisUtils.getTemplate().delete("mailRegist:"+email);
+        UserEntity data = oAuthMapper.getUserInfoByEmail(email);
+        ReturnData ret = ReturnData.ok();
+        ret.setData(data);
+        return ret;
+    }
+
+    private String createVerificationCode(int len){
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random(System.currentTimeMillis());
+        for(int i=0;i<len;++i){
+            int temp = -1;
+            while(!(temp>=48&&temp<=57) && !(temp>=65&&temp<=90) && !(temp>=97&&temp<=122)){
+                temp = random.nextInt(123);
+            }
+            sb.append((char)temp);
+        }
+        return sb.toString();
+    }
+    private boolean emailFormat(String email){
+        boolean isMatch = partern.matcher(email).matches();
+        return isMatch;
+    }
+
 }

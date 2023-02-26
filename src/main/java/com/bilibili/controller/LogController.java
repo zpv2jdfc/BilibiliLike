@@ -3,17 +3,14 @@ package com.bilibili.controller;
 import com.alibaba.fastjson.TypeReference;
 import com.bilibili.common.constant.CodeEnum;
 import com.bilibili.common.manager.Impl.RedisTokenManager;
-import com.bilibili.common.manager.TokenManager;
-import com.bilibili.common.utils.JWTUtil;
 import com.bilibili.common.utils.ReturnData;
-import com.bilibili.config.CacheService;
+import com.bilibili.config.RedisUtils;
 import com.bilibili.service.LogService;
 import com.bilibili.vo.UserLoginVo;
 import com.bilibili.vo.UserRegisterVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
@@ -26,7 +23,7 @@ public class LogController {
     @Autowired
     private RedisTokenManager tokenManager;
     @Autowired
-    private CacheService cacheService;
+    private RedisUtils redisUtils;
 
     @PostMapping(value = "/register")
     public ReturnData register(@RequestBody UserRegisterVo vo, HttpServletResponse response){
@@ -58,5 +55,18 @@ public class LogController {
         tokenManager.add(id, token);
         response.setHeader("token", token);
         return ret;
+    }
+
+    @PostMapping(value = "/sendMail")
+    public ReturnData getVerificationCode(@RequestParam("email") String email){
+        boolean res = this.logService.sendVerifyMail(email);
+        if(res)
+            return ReturnData.ok();
+        return ReturnData.error(20009,"邮件发送失败");
+    }
+
+    @PostMapping(value = "/mailRegist")
+    public ReturnData mailRegist(@RequestBody UserRegisterVo vo){
+        return logService.mailRegist(vo.getIdentifier(), vo.getCredential());
     }
 }

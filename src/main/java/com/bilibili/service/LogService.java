@@ -8,4 +8,7 @@ public interface LogService {
     ReturnData createUser(String name, String identitytype, String identifier, String credential);
 
     ReturnData login(UserLoginVo vo);
+
+    public boolean sendVerifyMail(String to);
+    ReturnData mailRegist(String email, String password);
 }

@@ -20,7 +20,7 @@ public interface VideoMapper {
     @Select("select * from tb_video where id = #{id}")
     @Results(
             value = {
-                    @Result(column = "id", property = "videoId", id = true),
+                    @Result(column = "bvcode", property = "videoId"),
                     @Result(column = "title", property = "videoTitle"),
                     @Result(column = "user_id", property = "userId"),
                     @Result(column = "duration", property = "duration"),
@@ -32,6 +32,9 @@ public interface VideoMapper {
                     @Result(column = "release_time", property = "upTime"),
                     @Result(column = "tags", property = "tags"),
                     @Result(column = "intro", property = "intro"),
+                    @Result(column = "user_id", property = "owner", javaType = UserProfileVo.class,
+                            one = @One(select = "com.bilibili.dao.VideoMapper.getUserProfileById")
+                    )
             }
     )
     VideoVo getVideoById(@Param("id") long id);
@@ -97,8 +100,8 @@ public interface VideoMapper {
     public UserProfileVo getUserProfileById(@Param("userId")long userId);
 
 //    用户上传视频
-    @Insert("insert into tb_video (title,tags,user_id,duration,like_num,comment_num,preview,release_time,status,create_time,lm_time,cover,url) " +
-            "values (#{title},#{tags},#{userId},#{duration},#{likeNum},#{commentNum},#{preview},#{releaseTime},#{status},#{createTime},#{lmTime},#{cover},#{md5})")
+    @Insert("insert into tb_video (title,tags,user_id,duration,like_num,comment_num,preview,release_time,status,create_time,lm_time,cover,url,bvcode) " +
+            "values (#{title},#{tags},#{userId},#{duration},#{likeNum},#{commentNum},#{preview},#{releaseTime},#{status},#{createTime},#{lmTime},#{cover},#{md5},#{bvCode})")
     public int addVideo(@Param("title")String title,
                         @Param("tags")String tags,
                         @Param("userId")long userId,
@@ -109,13 +112,13 @@ public interface VideoMapper {
                         @Param("releaseTime")Timestamp releaseTime,
                         @Param("status")int status,
                         @Param("createTime")Timestamp createTime,
-                        @Param("lmTime")Timestamp lmTime, @Param("cover") byte[] cover, @Param("intro") String intro,@Param("md5") String md5
+                        @Param("lmTime")Timestamp lmTime, @Param("cover") byte[] cover, @Param("intro") String intro,@Param("md5") String md5, @Param("bvCode")String bvCode
                         );
 //    分页查询视频
     @Select("select * from tb_video order by like_num desc limit #{start},20")
     @Results(
             value = {
-                @Result(column = "id", property = "videoId", id = true),
+                @Result(column = "bvcode", property = "videoId", id = true),
                 @Result(column = "title", property = "videoTitle"),
                 @Result(column = "user_id", property = "userId"),
                 @Result(column = "duration", property = "duration"),
@@ -137,7 +140,7 @@ public interface VideoMapper {
 @Select("select * from tb_video order by like_num desc limit 40")
 @Results(
         value = {
-                @Result(column = "id", property = "videoId", id = true),
+                @Result(column = "bvcode", property = "videoId", id = true),
                 @Result(column = "title", property = "videoTitle"),
                 @Result(column = "user_id", property = "userId"),
                 @Result(column = "duration", property = "duration"),
@@ -161,7 +164,7 @@ public List<VideoVo> getFirstPageVideo();
     @Select("select * from tb_recommend")
     @Results(
             value = {
-                    @Result(column = "id", property = "videoId", id = true),
+                    @Result(column = "bvcode", property = "videoId", id = true),
                     @Result(column = "title", property = "videoTitle"),
                     @Result(column = "user_id", property = "userId"),
                     @Result(column = "duration", property = "duration"),
@@ -186,7 +189,7 @@ public List<VideoVo> getFirstPageVideo();
 @Select("select * from tb_video where user_id = #{id}")
 @Results(
         value = {
-                @Result(column = "id", property = "videoId", id = true),
+                @Result(column = "bvcode", property = "videoId", id = true),
                 @Result(column = "title", property = "videoTitle"),
                 @Result(column = "user_id", property = "userId"),
                 @Result(column = "duration", property = "duration"),
@@ -206,7 +209,7 @@ public List<VideoVo> getFirstPageVideo();
     @Select("select * from tb_video where title like '%${title}%'")
     @Results(
             value = {
-                    @Result(column = "id", property = "videoId", id = true),
+                    @Result(column = "bvcode", property = "videoId", id = true),
                     @Result(column = "title", property = "videoTitle"),
                     @Result(column = "user_id", property = "userId"),
                     @Result(column = "duration", property = "duration"),
@@ -224,4 +227,51 @@ public List<VideoVo> getFirstPageVideo();
             }
     )
     List<VideoVo> getALlVideoByTitle(@Param("title")String title);
+
+    /**
+     * bvcode获取上传该视频的用户
+     * @param videoId
+     * @return
+     */
+    @Select("select user_id from tb_video where id = #{videoId}")
+    @Result(column = "user_id", property = "owner", javaType = UserProfileVo.class,
+            one = @One(select = "com.bilibili.dao.VideoMapper.getUserProfileById"))
+    public Map getUserInfoByUploaderId(@Param("videoId")long videoId);
+
+    @Select("select 1 from tb_video where url = #{url} limit 1")
+//    public List<VideoVo> getVideoByUrl(@Param("url")String url);
+    public Integer getVideoByUrl(@Param("url")String url);
+
+    @Update("update tb_video set play_num = #{playNum} where id = #{videoId}")
+    public int updatePlayNum(@Param("videoId")long videoId, @Param("playNum")int playNum);
+
+    @Select("select id from tb_video where bvcode =  #{bvcode}")
+    public long getIdByBVCode(@Param("bvcode")long bvcode);
+
+    @Select("select bvcode from tb_video where id =  #{id}")
+    public long getBVCodeById(@Param("id")long id);
+
+//    预加载
+    @Select("select * from tb_video")
+    @Results(
+            value = {
+                    @Result(column = "id", property = "videoId"),
+                    @Result(column = "bvcode", property = "bvcode"),
+                    @Result(column = "title", property = "videoTitle"),
+                    @Result(column = "user_id", property = "userId"),
+                    @Result(column = "duration", property = "duration"),
+                    @Result(column = "url", property = "url"),
+                    @Result(column = "like_num", property = "likeNum"),
+                    @Result(column = "play_num", property = "playNum"),
+                    @Result(column = "biu_num", property = "biuNum"),
+                    @Result(column = "comment_num", property = "commentNum"),
+                    @Result(column = "release_time", property = "upTime"),
+                    @Result(column = "tags", property = "tags"),
+                    @Result(column = "intro", property = "intro"),
+                    @Result(column = "user_id", property = "owner", javaType = UserProfileVo.class,
+                            one = @One(select = "com.bilibili.dao.VideoMapper.getUserProfileById")
+                    )
+            }
+    )
+    public List<VideoVo> getAllVideo();
 }
