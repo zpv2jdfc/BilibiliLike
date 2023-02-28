@@ -33,4 +33,6 @@ public interface VideoService {
     public List<VideoVo> getRecommendVideo();
     public List<VideoVo> getALlVideoByTitle(String title);
     public Map getUserByBVCode(long BVCode);
+    public int thumb(long userId, long bvCode);
+    public int unThumb(long userId, long bvCode);
 }

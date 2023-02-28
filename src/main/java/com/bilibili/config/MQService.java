@@ -31,10 +31,19 @@ public class MQService {
     @Value(value = "${rocketmq.producer.topic}:${rocketmq.producer.oneway-tag}")
     private String onewayTag;
 
+    @Value(value = "${rocketmq.producer.topic}:")
+    private String topic;
 
-
-
-
+    public ResponseMsg push(String tag, String message){
+        String messageStr = "order id : " + message;
+        Message<String> m = MessageBuilder.withPayload(messageStr)
+                .setHeader(RocketMQHeaders.KEYS, message)
+                .build();
+        rocketMQTemplate.asyncSend(topic+tag, m, new SendCallbackListener(message));
+        ResponseMsg msg = new ResponseMsg();
+        msg.setSuccessData(null);
+        return msg;
+    }
     /**
      * 发送异步消息
      *

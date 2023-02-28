@@ -87,7 +87,9 @@ public class RedisUtils  {
         }
         return result;
     }
-
+    public boolean setNX(String key, Object value){
+        return redisTemplate.opsForValue().setIfAbsent(key, value);
+    }
     public boolean set(final String key, Object value) {
         boolean result = false;
         try {

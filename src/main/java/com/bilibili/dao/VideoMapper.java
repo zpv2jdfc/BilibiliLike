@@ -274,4 +274,5 @@ public List<VideoVo> getFirstPageVideo();
             }
     )
     public List<VideoVo> getAllVideo();
+
 }

@@ -3,6 +3,7 @@ package com.bilibili.service.Impl;
 import com.bilibili.common.constant.CodeEnum;
 import com.bilibili.common.utils.BloomFilterHelper;
 import com.bilibili.common.utils.ReturnData;
+import com.bilibili.config.MQService;
 import com.bilibili.config.RedisUtils;
 import com.bilibili.dao.VideoMapper;
 import com.bilibili.service.RankService;
@@ -32,6 +33,8 @@ public class VideoServiceImpl implements VideoService {
     private RedisUtils redisUtils;
     @Autowired
     private BloomFilterHelper bloomFilterHelper;
+    @Autowired
+    private MQService mqService;
 
     private final String allBVCode = "allBVCode";
 
@@ -39,6 +42,9 @@ public class VideoServiceImpl implements VideoService {
     private static DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private final String playNum = "playNum";
     private final String bvToId = "bvToId:";
+    private final String thumbNum = "thumbNum:";
+    private final String thumbed = "thumbed:";
+    private final String cacheTag = "redisMessage";
 
     @Override
     public List<Map> getBiu(long bvcode, int begin, int end) {
@@ -46,7 +52,7 @@ public class VideoServiceImpl implements VideoService {
         if(this.redisUtils.hasKey(bvToId+bvcode)){
             id = (Long)redisUtils.get(bvToId+bvcode);
         }else {
-            if(!this.redisUtils.includeByBloomFilter(bloomFilterHelper,allBVCode,String.valueOf(bvcode))){
+            if(redisUtils.hasKey(allBVCode) && !this.redisUtils.includeByBloomFilter(bloomFilterHelper,allBVCode,String.valueOf(bvcode))){
                 return null;
             }
             id = this.videoMapper.getIdByBVCode(bvcode);
@@ -113,7 +119,7 @@ public class VideoServiceImpl implements VideoService {
         if(this.redisUtils.hasKey(bvToId+bvcode)){
             videoId = (Long)redisUtils.get(bvToId+bvcode);
         }else {
-            if(!this.redisUtils.includeByBloomFilter(bloomFilterHelper,allBVCode,String.valueOf(bvcode))){
+            if(redisUtils.hasKey(allBVCode) && !this.redisUtils.includeByBloomFilter(bloomFilterHelper,allBVCode,String.valueOf(bvcode))){
                 return null;
             }
             videoId = this.videoMapper.getIdByBVCode(bvcode);
@@ -204,5 +210,40 @@ public class VideoServiceImpl implements VideoService {
             videoId = this.videoMapper.getIdByBVCode(bvcode);
         }
         return this.videoMapper.getUserInfoByUploaderId(videoId);
+    }
+
+    @Override
+    public int thumb(long userId, long bvCode) {
+        long videoId = -1;
+        if(this.redisUtils.hasKey(bvToId+bvCode)){
+            videoId = (Long)redisUtils.get(bvToId+bvCode);
+        }else {
+            if(redisUtils.hasKey(allBVCode) && !this.redisUtils.includeByBloomFilter(bloomFilterHelper,allBVCode,String.valueOf(bvCode))){
+                return -1;
+            }
+            videoId = this.videoMapper.getIdByBVCode(bvCode);
+        }
+        long res = -1;
+//        24小时内点赞过
+        if(redisUtils.hasKey(thumbed+videoId+":"+userId) && Boolean.parseBoolean(redisUtils.get(thumbed+videoId+":"+userId).toString())){
+            return (int)res;
+        }
+        if(redisUtils.setNX(thumbNum+videoId,1)){
+            res = 1;
+        }else {
+            res = redisUtils.incrBy(thumbNum+videoId);
+        }
+        if(res!=-1){
+            redisUtils.set(thumbed+videoId+":"+userId, true, 86400l);
+        }
+
+        String msg = videoId+";"+userId+";"+true+";"+res;
+        mqService.push(cacheTag,msg);
+        return (int)res;
+    }
+
+    @Override
+    public int unThumb(long userId, long bvCode) {
+        return 0;
     }
 }
