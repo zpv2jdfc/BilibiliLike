@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -45,10 +46,20 @@ public class VideoServiceImpl implements VideoService {
         if(this.redisUtils.hasKey(bvToId+bvcode)){
             id = (Long)redisUtils.get(bvToId+bvcode);
         }else {
+            if(!this.redisUtils.includeByBloomFilter(bloomFilterHelper,allBVCode,String.valueOf(bvcode))){
+                return null;
+            }
             id = this.videoMapper.getIdByBVCode(bvcode);
         }
         String tableName = "tb_video_biu" + id/10000;
-        return videoMapper.getBiu(tableName,id,begin,end);
+        if(this.redisUtils.hasKey(tableName+":"+id)){
+            List<Map> l = (List)redisUtils.get(tableName+":"+id);
+            redisUtils.expire(tableName+":"+id, 600l, TimeUnit.SECONDS);
+            return l;
+        }
+        List res = videoMapper.getBiu(tableName,id,begin,end);
+        this.redisUtils.set(tableName+":"+id,res,600l);
+        return res;
     }
 
     @Override
