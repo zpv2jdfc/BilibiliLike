@@ -16,6 +16,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
 @Slf4j
@@ -40,11 +41,10 @@ public class AuthorizationService {
     @Around("permissionCheck()")
     public Object permissionCheckFirst(ProceedingJoinPoint joinPoint) throws Throwable {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
         String token = request.getHeader(authorization);
         long id = JWTUtil.getUID(token);
         if (id < 0) {
-            ObjectMapper mapper  = new ObjectMapper();
-            ReturnData res = ReturnData.error(20001,"验证错误");
             return false;
         }
         return joinPoint.proceed();

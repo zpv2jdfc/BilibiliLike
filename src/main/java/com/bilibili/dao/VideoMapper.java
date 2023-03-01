@@ -1,6 +1,7 @@
 package com.bilibili.dao;
 
 import com.bilibili.entity.VideoEntity;
+import com.bilibili.vo.BarrageVo;
 import com.bilibili.vo.UserProfileVo;
 import com.bilibili.vo.VideoVo;
 import org.apache.ibatis.annotations.*;
@@ -275,4 +276,15 @@ public List<VideoVo> getFirstPageVideo();
     )
     public List<VideoVo> getAllVideo();
 
+    @Insert("<script>" +
+            "insert into ${tableName}" +
+            "(video_id,content,biu_time)" +
+            "values" +
+            "<foreach item='item' index='index' collection='list' separator=','> " +
+            "(" +
+            "#{item.videoId},#{item.content},#{item.time}" +
+            ")" +
+            "</foreach>" +
+            "</script>")
+    public Integer addBarrages(@Param("tableName")String tableName,@Param("list") List<BarrageVo> list);
 }

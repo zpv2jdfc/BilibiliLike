@@ -14,7 +14,9 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSON;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -27,13 +29,17 @@ public class RedisUtils  {
     @Qualifier(value = "myRedisTemplate")
     private RedisTemplate redisTemplate;
 
-
+    @Autowired
+    @Qualifier(value = "myStringRedisTemplate")
+    private StringRedisTemplate stringRedisTemplate;
 
     public RedisTemplate getTemplate(){
         return this.redisTemplate;
     }
 
     private final String DEFAULT_KEY_PREFIX = "";
+
+
     /**
      * 是否存在key
      */
@@ -93,9 +99,15 @@ public class RedisUtils  {
     public boolean set(final String key, Object value) {
         boolean result = false;
         try {
-            ValueOperations<String, Object> operations = redisTemplate.opsForValue();
-            operations.set(key, value);
-            result = true;
+            if(value instanceof String){
+                ValueOperations<String, String> operations = redisTemplate.opsForValue();
+                operations.set(key, value.toString());
+                result = true;
+            }else {
+                ValueOperations<String, Object> operations = redisTemplate.opsForValue();
+                operations.set(key, value);
+                result = true;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -197,4 +209,26 @@ public class RedisUtils  {
         return true;
     }
 
+    public void setRange(String key, String value, long offset){
+        this.redisTemplate.opsForValue().set(key, value, offset);
+    }
+    public long STRLEN(String key){
+        return redisTemplate.opsForValue().size(key);
+    }
+    public Set<String> keys(String key){
+        return redisTemplate.keys(key);
+    }
+
+    public void setString(String key, String value){
+        stringRedisTemplate.opsForValue().set(key, value);
+    }
+    public void setStringRange(String key, String value, long offset){
+        stringRedisTemplate.opsForValue().set(key, value ,offset);
+    }
+    public String getString(String key){
+        return stringRedisTemplate.opsForValue().get(key);
+    }
+    public long stringSTRLEN(String key){
+        return stringRedisTemplate.opsForValue().size(key);
+    }
 }

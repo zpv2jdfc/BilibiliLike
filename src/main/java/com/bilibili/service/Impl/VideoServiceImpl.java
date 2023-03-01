@@ -7,12 +7,16 @@ import com.bilibili.config.MQService;
 import com.bilibili.config.RedisUtils;
 import com.bilibili.dao.VideoMapper;
 import com.bilibili.service.RankService;
+import com.bilibili.service.ScheduleService;
 import com.bilibili.service.VideoService;
 import com.bilibili.vo.BarrageVo;
 import com.bilibili.vo.UploadVideoVo;
 import com.bilibili.vo.UserProfileVo;
 import com.bilibili.vo.VideoVo;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -22,7 +26,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
+@Slf4j
 @Service
 public class VideoServiceImpl implements VideoService {
     @Autowired
@@ -45,6 +49,7 @@ public class VideoServiceImpl implements VideoService {
     private final String thumbNum = "thumbNum:";
     private final String thumbed = "thumbed:";
     private final String cacheTag = "redisMessage";
+    private final String tableBiu = "tableBiu:";
 
     @Override
     public List<Map> getBiu(long bvcode, int begin, int end) {
@@ -57,15 +62,48 @@ public class VideoServiceImpl implements VideoService {
             }
             id = this.videoMapper.getIdByBVCode(bvcode);
         }
-        String tableName = "tb_video_biu" + id/10000;
-        if(this.redisUtils.hasKey(tableName+":"+id)){
-            List<Map> l = (List)redisUtils.get(tableName+":"+id);
-            redisUtils.expire(tableName+":"+id, 600l, TimeUnit.SECONDS);
-            return l;
+//        从缓存中取弹幕
+        if(redisUtils.hasKey(tableBiu+id)){
+            String jsonStr = redisUtils.get(tableBiu+id).toString();
+            ObjectMapper mapper = new ObjectMapper();
+            List res = new ArrayList();
+            try {
+                res = mapper.readValue(jsonStr, List.class);
+            }catch (Exception e){
+                log.info(e.getMessage());
+            }
+            return res;
         }
-        List res = videoMapper.getBiu(tableName,id,begin,end);
-        this.redisUtils.set(tableName+":"+id,res,600l);
-        return res;
+//          加锁，防止缓存击穿
+        synchronized ((tableBiu+id).intern()){
+            if(redisUtils.hasKey(tableBiu+id)){
+                String jsonStr = redisUtils.get(tableBiu+id).toString();
+                ObjectMapper mapper = new ObjectMapper();
+                List res = new ArrayList();
+                try {
+                    res = mapper.readValue(jsonStr, List.class);
+                }catch (Exception e){
+                    log.info(e.getMessage());
+                }
+                return res;
+            }
+            String tableName = "tb_video_biu" + id/10000;
+            if(this.redisUtils.hasKey(tableName+":"+id)){
+                List<Map> l = (List)redisUtils.get(tableName+":"+id);
+                redisUtils.expire(tableName+":"+id, 600l, TimeUnit.SECONDS);
+//                return l;
+            }
+            List res = videoMapper.getBiu(tableName,id,begin,end);
+            this.redisUtils.set(tableName+":"+id,res,600l);
+            String jsonStr = null;
+            try {
+                jsonStr = new ObjectMapper().writeValueAsString(res);
+            }catch (Exception e){
+                log.info(e.getMessage());
+            }
+            redisUtils.set(tableBiu+id, jsonStr, 600l);
+            return res;
+        }
     }
 
     @Override
@@ -77,11 +115,32 @@ public class VideoServiceImpl implements VideoService {
         }else {
             videoId = this.videoMapper.getIdByBVCode(bvcode);
         }
-        String tableName = "tb_video_biu" + videoId/10000;
-        String content = vo.getContent();
-        long userId = 0;
-        int time = vo.getTime();
-        return videoMapper.addBiu(tableName,videoId,content,userId,time);
+        synchronized ((tableBiu+videoId).intern()){
+            if(redisUtils.hasKey(tableBiu+videoId)){
+            String content = ",{\\\"biu_time\\\":"+vo.getTime()+",\\\"content\\\":\\\""+vo.getContent()+"\\\"}]\"";
+            long len = redisUtils.stringSTRLEN(tableBiu+videoId);
+            redisUtils.setStringRange(tableBiu+videoId, content, len-2);
+            }else {
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonStr = "";
+                try{
+                    List temp = new ArrayList();
+                    temp.add(vo);
+                    jsonStr = mapper.writeValueAsString(temp);
+                }catch (Exception e){
+                    log.info(e.getMessage());
+                }
+                redisUtils.setString(tableBiu+videoId, jsonStr);
+            }
+        }
+        vo.setVideoId(videoId);
+        ScheduleService.barrageQue.offer(vo);
+        return 1;
+//        String tableName = "tb_video_biu" + videoId/10000;
+//        String content = vo.getContent();
+//        long userId = 0;
+//        int time = vo.getTime();
+//        return videoMapper.addBiu(tableName,videoId,content,userId,time);
     }
 
 
@@ -128,7 +187,7 @@ public class VideoServiceImpl implements VideoService {
         if(!this.redisUtils.hExists(playNum, String.valueOf(videoId))){
             redisUtils.hSet(playNum,String.valueOf(videoId), vo.getPlayNum());
         }
-        vo.setPlayNum((Integer)redisUtils.hGet(playNum, String.valueOf(videoId)));
+        vo.setPlayNum(Long.parseLong(redisUtils.hGet(playNum, String.valueOf(videoId)).toString()));
         return vo;
     }
 

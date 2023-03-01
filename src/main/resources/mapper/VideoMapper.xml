@@ -26,4 +26,6 @@
         FROM <include refid="tableName"></include>
         WHERE bvcode = #{id}
     </select>
+
+
 </mapper>
