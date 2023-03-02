@@ -198,4 +198,19 @@ public class VideoController {
         res.setData(vo);
         return res;
     }
+    @PostMapping(value = "thumb")
+    public boolean thumb(@Param("userId")long userId,@Param("bvCode")long bvCode){
+        return videoService.thumb(userId, bvCode)==1;
+    }
+    @PostMapping(value = "unthumb")
+    public boolean unthumb(@Param("userId")long userId,@Param("bvCode")long bvCode){
+        return videoService.unThumb(userId, bvCode)==1;
+    }
+    @GetMapping(value = "getthumb")
+    public ReturnData getthumb(@Param("bvCode")long bvCode){
+        long num = videoService.getThumb(bvCode);
+        ReturnData res = ReturnData.ok();
+        res.setData(num);
+        return res;
+    }
 }

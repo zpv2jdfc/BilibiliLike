@@ -284,25 +284,77 @@ public class VideoServiceImpl implements VideoService {
         }
         long res = -1;
 //        24小时内点赞过
-        if(redisUtils.hasKey(thumbed+videoId+":"+userId) && Boolean.parseBoolean(redisUtils.get(thumbed+videoId+":"+userId).toString())){
+        if(redisUtils.hasKey(thumbed+videoId+":"+userId)){
             return (int)res;
         }
-        if(redisUtils.setNX(thumbNum+videoId,1)){
-            res = 1;
-        }else {
-            res = redisUtils.incrBy(thumbNum+videoId);
+//            点赞成功
+        res = 1;
+        if(!redisUtils.hasKey(thumbNum+videoId)){
+            synchronized ((thumbNum+videoId).intern()){
+                if(!redisUtils.hasKey(thumbNum+videoId)){
+                    long likeNum = videoMapper.getThumbNum(videoId);
+                    redisUtils.set(thumbNum+videoId, likeNum);
+                }
+            }
         }
-        if(res!=-1){
-            redisUtils.set(thumbed+videoId+":"+userId, true, 86400l);
-        }
+        redisUtils.incrBy(thumbNum+videoId);
 
-        String msg = videoId+";"+userId+";"+true+";"+res;
-        mqService.push(cacheTag,msg);
+//        记录用户点赞行为，防止刷赞
+        redisUtils.set(thumbed+videoId+":"+userId, 1, 86400l);
+
         return (int)res;
     }
 
     @Override
     public int unThumb(long userId, long bvCode) {
-        return 0;
+        long videoId = -1;
+        if(this.redisUtils.hasKey(bvToId+bvCode)){
+            videoId = (Long)redisUtils.get(bvToId+bvCode);
+        }else {
+            if(redisUtils.hasKey(allBVCode) && !this.redisUtils.includeByBloomFilter(bloomFilterHelper,allBVCode,String.valueOf(bvCode))){
+                return -1;
+            }
+            videoId = this.videoMapper.getIdByBVCode(bvCode);
+        }
+//        没有点赞过
+        if(!redisUtils.hasKey(thumbed+videoId+":"+userId)){
+            return -1;
+        }
+//      取消赞失败
+        if(!redisUtils.delKey(thumbed+videoId+":"+userId)){
+            return -1;
+        }
+        if(!redisUtils.hasKey(thumbNum+videoId)){
+            synchronized ((thumbNum+videoId).intern()){
+                if(!redisUtils.hasKey(thumbNum+videoId)){
+                    long likeNum = videoMapper.getThumbNum(videoId);
+                    redisUtils.set(thumbNum+videoId, likeNum);
+                }
+            }
+        }
+        redisUtils.incrBy(thumbNum+videoId);
+        return 1;
+    }
+    @Override
+    public long getThumb(long bvCode){
+        long videoId = -1;
+        if(this.redisUtils.hasKey(bvToId+bvCode)){
+            videoId = (Long)redisUtils.get(bvToId+bvCode);
+        }else {
+            if(redisUtils.hasKey(allBVCode) && !this.redisUtils.includeByBloomFilter(bloomFilterHelper,allBVCode,String.valueOf(bvCode))){
+                return -1;
+            }
+            videoId = this.videoMapper.getIdByBVCode(bvCode);
+        }
+        if(!redisUtils.hasKey(thumbNum+videoId)){
+            synchronized ((thumbNum+videoId).intern()){
+                if(!redisUtils.hasKey(thumbNum+videoId)){
+                    long likeNum = videoMapper.getThumbNum(videoId);
+                    redisUtils.set(thumbNum+videoId, likeNum);
+                    return likeNum;
+                }
+            }
+        }
+        return Long.parseLong(redisUtils.get(thumbNum+videoId).toString());
     }
 }

@@ -35,4 +35,5 @@ public interface VideoService {
     public Map getUserByBVCode(long BVCode);
     public int thumb(long userId, long bvCode);
     public int unThumb(long userId, long bvCode);
+    public long getThumb(long bvCode);
 }

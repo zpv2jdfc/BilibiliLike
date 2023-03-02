@@ -287,4 +287,10 @@ public List<VideoVo> getFirstPageVideo();
             "</foreach>" +
             "</script>")
     public Integer addBarrages(@Param("tableName")String tableName,@Param("list") List<BarrageVo> list);
+
+    @Select("select like_num from tb_video where id = #{videoId}")
+    public Integer getThumbNum(@Param("videoId")long videoId);
+
+    @Update("update tb_video set like_num = thumbNum where id = #{videoId}")
+    public int updateThumb(@Param("videoId")long videoId, @Param("thumbNum")long thumbNum);
 }

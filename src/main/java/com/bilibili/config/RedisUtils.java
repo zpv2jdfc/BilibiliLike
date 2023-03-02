@@ -46,7 +46,9 @@ public class RedisUtils  {
     public Boolean hasKey(String key) {
         return redisTemplate.hasKey(key);
     }
-
+    public boolean delKey(String key){
+        return redisTemplate.delete(key);
+    }
     /**
      * 返回 key 的剩余的过期时间
      */

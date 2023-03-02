@@ -49,4 +49,11 @@ public class AuthorizationService {
         }
         return joinPoint.proceed();
     }
+
+//    根据bvCode获取id
+    public Object modifyParameter(ProceedingJoinPoint pjp) throws Throwable {
+        Object[] args = pjp.getArgs();
+        Object result = pjp.proceed(args);
+        return result;
+    }
 }

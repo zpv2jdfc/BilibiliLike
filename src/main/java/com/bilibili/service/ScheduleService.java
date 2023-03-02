@@ -31,6 +31,7 @@ public class ScheduleService {
 
     private final String playNum = "playNum";
     private final String tableBiu = "tableBiu:";
+    private final String thumbNum = "thumbNum:";
 
     @Scheduled(cron = "1-2 * * * * ? ")
     public void savePlayNum(){
@@ -61,5 +62,18 @@ public class ScheduleService {
         String tableName = "tb_video_biu0" ;
         if(l.size()>0)
             this.videoMapper.addBarrages(tableName, l);
+    }
+
+    /**
+     * 同步点赞数量
+     */
+    @Scheduled(cron = "0/10 * *  * * ?")
+    public void saveThumb(){
+        Set<String> set = redisUtils.keys(thumbNum);
+        for(String key : set){
+            long videoId = Long.parseLong(key.split(":")[1]);
+            long num = Long.parseLong(redisUtils.get(key).toString());
+            videoMapper.updateThumb(videoId, num);
+        }
     }
 }
