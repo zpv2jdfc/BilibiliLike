@@ -21,15 +21,15 @@ public class MessageService implements RocketMQListener<String> {
     private RedisUtils redisUtils;
     @Override
     public void onMessage(String message) {
-        String uuid = message;
+        String uuid = message.split(":")[0];
         String key = sendedMessage+uuid;
         if(!redisUtils.hasKey(key)){
 //            消息已经得到确认， 无需记录到离线消息列表
         }else{
 //            消息还在发送中列表中， 超时了， 放到离线消息列表
             redisUtils.delKey(key);
-            String to = message.split(":")[2];
-            redisUtils.rPush(message+to, message);
+            String to = message.split(":")[3];
+            redisUtils.rPush("message:"+to, message.substring(message.indexOf(":")+1));
             redisUtils.expire(message+to, 7 , TimeUnit.DAYS);
         }
     }

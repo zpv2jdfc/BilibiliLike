@@ -1,6 +1,7 @@
 package com.bilibili.service;
 
 import com.bilibili.config.RedisUtils;
+import com.bilibili.controller.WebSocketServer;
 import com.bilibili.dao.VideoMapper;
 import com.bilibili.vo.BarrageVo;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,8 @@ public class ScheduleService {
     private final String playNum = "playNum";
     private final String tableBiu = "tableBiu:";
     private final String thumbNum = "thumbNum:";
+
+    private final long overTime = 1000*60;
 
     @Scheduled(cron = "1-2 * * * * ? ")
     public void savePlayNum(){
@@ -74,6 +77,17 @@ public class ScheduleService {
             long videoId = Long.parseLong(key.split(":")[1]);
             long num = Long.parseLong(redisUtils.get(key).toString());
             videoMapper.updateThumb(videoId, num);
+        }
+    }
+
+    @Scheduled(cron = "0/30 * *  * * ?")
+    public void keepAlive(){
+        for(Map.Entry entry : WebSocketServer.webSocketServerMAP.entrySet()){
+            WebSocketServer server = ((WebSocketServer)entry.getValue());
+            if(System.currentTimeMillis() - server.lastHeart > (overTime)){
+//                超时
+                server.disConnect();
+            }
         }
     }
 }

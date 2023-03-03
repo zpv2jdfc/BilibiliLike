@@ -4,6 +4,7 @@ package com.bilibili.controller;
 import com.alibaba.fastjson.JSON;
 import com.bilibili.config.MQService;
 import com.bilibili.config.RedisUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,9 +41,10 @@ public class WebSocketServer {
         WebSocketServer.mqService = mqService;
     }
 
-    private static ConcurrentHashMap<String, WebSocketServer> webSocketServerMAP = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, WebSocketServer> webSocketServerMAP = new ConcurrentHashMap<>();
     private Map<String,String> msgMap = new HashMap<>();
 
+    public long lastHeart = System.currentTimeMillis();
     private final static String online = "online";
     private final static String ack = "ack";
     private final static String message = "message:";
@@ -77,10 +79,16 @@ public class WebSocketServer {
      */
     @OnClose
     public void onClose() throws IOException {
-        webSocketServerMAP.remove(uri);//删除uri对应的连接服务
-        reduceOnlineCount(); // 在线数减1
+        webSocketServerMAP.remove(sid);
     }
-
+    public void disConnect(){
+        try {
+            webSocketServerMAP.remove(sid);
+            session.close();
+        }catch (Exception e){
+            log.info(e.getMessage());
+        }
+    }
     /**
      * online
      * ack:msgId
@@ -101,7 +109,9 @@ public class WebSocketServer {
             // 用户确认收到消息
             String msgKey = message.split(":")[1];
             redisUtils.delKey(sendedMessage+msgKey);
-        }else {
+        }else if(message.equals("heartbeat")){
+            lastHeart = System.currentTimeMillis();
+        }else{
             // 用户发送私信
             sendMsg(message);
         }
@@ -118,13 +128,15 @@ public class WebSocketServer {
             UUID uuid = UUID.randomUUID();
             redisUtils.set(sendedMessage+uuid, msg);
 //            消息队列发送延时消息， 1分钟后检查有没有收到确认
-            mqService.pushDelayMessage(uuid.toString(), "checkovertime");
+            mqService.pushDelayMessage(uuid.toString()+":"+msg, "checkovertime");
             trySend(fromId, toId, msg+":"+uuid);
         }
     }
     private void trySend(String from, String to, String fullMsg){
         try{
-            webSocketServerMAP.get(to).session.getAsyncRemote().sendText(fullMsg);
+            String jsonStr = null;
+            jsonStr = new ObjectMapper().writeValueAsString(fullMsg);
+            webSocketServerMAP.get(to).session.getAsyncRemote().sendText(jsonStr);
         }catch (Exception e){
             log.info(e.getMessage());
         }
