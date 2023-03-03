@@ -214,6 +214,15 @@ public class RedisUtils  {
     public void setRange(String key, String value, long offset){
         this.redisTemplate.opsForValue().set(key, value, offset);
     }
+    public long rPush(String key, String value){
+        return this.redisTemplate.opsForList().rightPush(key, value);
+    }
+    public Object lPop(String key){
+        return this.redisTemplate.opsForList().leftPop(key);
+    }
+    public long lLen(String key){
+        return this.redisTemplate.opsForList().size(key);
+    }
     public long STRLEN(String key){
         return redisTemplate.opsForValue().size(key);
     }

@@ -34,6 +34,9 @@ public class MQService {
     @Value(value = "${rocketmq.producer.topic}:")
     private String topic;
 
+//    延时消息检查 发送的私信是否超时失败
+    private final String msgExpireTopic = "msgExpireTopic";
+
     public ResponseMsg push(String tag, String message){
         String messageStr = "order id : " + message;
         Message<String> m = MessageBuilder.withPayload(messageStr)
@@ -86,6 +89,24 @@ public class MQService {
         return msg;
     }
 
+//    延时消息
+    public ResponseMsg pushDelayMessage(String msg, String tags){
+        //定时/延时消息发送
+        MessageBuilder messageBuilder = null;
+        //以下示例表示：延迟时间为10分钟之后的Unix时间戳。
+        Long deliverTimeStamp = System.currentTimeMillis() + 10L * 60 * 1000;
+        String destination = msgExpireTopic + ":" + tags;
+        Message message = MessageBuilder.withPayload(msg)
+                .setHeader(RocketMQHeaders.KEYS, "checkovertime")
+                .build();
+        try {
+            //发送消息，需要关注发送结果，并捕获失败等异常。   delaylevel 5 = 1m
+            SendResult sendResult = rocketMQTemplate.syncSend(destination, message, 5000, 5);
+        } catch (Exception e) {
+
+        }
+        return null;
+    }
 
     private class SendCallbackListener implements SendCallback {
 
